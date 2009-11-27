@@ -6,12 +6,19 @@
  * 
  */
 using System;
+using System.Security.Permissions;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.Design;
 
 namespace nxAjax.UI.Controls
 {
 	/// <summary>
 	/// MenuItem 
 	/// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [ToolboxData("<{0}:MenuItem runat=\"server\"></{0}:Menu>")]
 	public class MenuItem
 	{
 		private string text, value, key;

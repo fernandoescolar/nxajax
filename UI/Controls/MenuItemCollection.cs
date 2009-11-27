@@ -7,15 +7,12 @@
  */
 using System;
 using System.Collections;
-using System.ComponentModel;
-
 
 namespace nxAjax.UI.Controls
 {
 	/// <summary>
 	/// MenuItems Collection
 	/// </summary>
-	[DefaultProperty("Text")]
 	public class MenuItemCollection : CollectionBase
 	{
 		private MenuItem parent;

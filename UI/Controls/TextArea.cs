@@ -6,10 +6,12 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.Globalization;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -19,11 +21,14 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:TextArea runat="server"&gt;&lt;/ajax:TextArea&gt;
     /// </code>
     /// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [DefaultEventAttribute("ServerChange")]
     [ToolboxData("<{0}:TextArea runat=\"server\"></{0}:TextArea>")]
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(System.Web.UI.HtmlControls.HtmlTextArea))]
+    [DefaultProperty("Value")]
     public class TextArea : nxContainerControl
     {
         #region Public Javascript Client Events

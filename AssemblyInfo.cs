@@ -43,7 +43,7 @@ using System.Runtime.CompilerServices;
 //
 // Utilice los atributos siguientes para controlar qué clave desea utilizar para firmar. 
 //
-// Notas: 
+// Notas:
 //   (*) Si no se especifica ninguna clave, el ensamblado no se firma.
 //   (*) KeyName se refiere a una clave instalada en el Proveedor de servicios
 //       de cifrado (CSP) en el equipo. KeyFile se refiere a un archivo que contiene

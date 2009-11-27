@@ -6,9 +6,11 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -18,10 +20,13 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:Label runat="server"&gt;&lt;/ajax:Label&gt;
     /// </code>
 	/// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
 	[ToolboxData("<{0}:Label runat=\"server\"></{0}:Label>")]
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(System.Web.UI.WebControls.Label))]
+    [DefaultProperty("Text")]
 	public class Label : nxContainerControl
 	{
         /// <summary>

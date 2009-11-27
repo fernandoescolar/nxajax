@@ -7,6 +7,7 @@
  */
 
 using System;
+using System.Xml;
 using System.ComponentModel;
 using nxAjax.UI.Controls;
 
@@ -16,14 +17,16 @@ namespace nxAjax.UI
 	/// nxAjax Web Page Base
 	/// </summary>
 	public class nxPage : System.Web.UI.Page
-	{
-		protected bool itIsPostBack = false;
+    {
+        #region Not public attributes
+        protected bool itIsPostBack = false;
 		protected Templates template;
 		internal protected Language lang;
 		protected nxControlCollection containedControls = new nxControlCollection();
         protected nxUserControlCollection containedUserControls = new nxUserControlCollection();
 		protected string path, sPage,code="";
-
+        #endregion
+        #region Public Properties
         /// <summary>
         /// Get contained nxControlCollection
         /// </summary>
@@ -44,26 +47,6 @@ namespace nxAjax.UI
             {
                 return containedUserControls;
             }
-        }
-		
-		protected override void AddedControl(System.Web.UI.Control control, int index)
-		{
-			try
-			{
-                AddControl(control);
-                control.Page = this;
-                if (control is nxControl)
-				    containedControls += (nxControl)control;
-                if (control is nxUserControl)
-                    containedUserControls += (nxUserControl)control;
-			}
-			catch{}
-		}
-        protected virtual void AddControl(System.Web.UI.Control control)
-        {
-            if (control.Controls.Count > 0 && !(control is IChildnxControlContainer))
-                foreach (System.Web.UI.Control c in control.Controls)
-                    AddedControl(c, 0);
         }
 
         /// <summary>
@@ -88,8 +71,9 @@ namespace nxAjax.UI
 				sPage = s[s.Length-1];
 				path = value.Replace(sPage, "");
 			}
-		}
-
+        }
+        #endregion
+        #region Factory
         /// <summary>
         /// Creates a new nxPage
         /// </summary>
@@ -100,7 +84,42 @@ namespace nxAjax.UI
 			this.EnableViewState = true;
 			this.code = "";
             this.path = this.sPage = "";
-		}
+        }
+        #endregion
+        #region Load Methods
+        protected override void AddedControl(System.Web.UI.Control control, int index)
+        {
+            try
+            {
+                AddControl(control);
+                control.Page = this;
+                if (control is nxControl)
+                    containedControls += (nxControl)control;
+                if (control is nxUserControl)
+                    containedUserControls += (nxUserControl)control;
+            }
+            catch { }
+        }
+        protected virtual void AddControl(System.Web.UI.Control control)
+        {
+            if (control.Controls.Count > 0 && !(control is IChildnxControlContainer))
+                foreach (System.Web.UI.Control c in control.Controls)
+                    AddedControl(c, 0);
+        }
+
+        protected virtual void getLoadedLanguage()
+        {
+            if (lang == null && Session["Language"] != null)
+                if (Session["Language"].GetType() == typeof(Language))
+                    lang = (Language)Session["Language"];
+            if (lang == null && Application["Language"] != null)
+                if (Application["Language"].GetType() == typeof(Language))
+                    lang = (Language)Application["Language"];
+        }
+        protected virtual void getIfItIsPostback()
+        {
+            itIsPostBack = (Request.QueryString["__id"] != null || Request.Form.Count > 0);
+        }
 
         /// <summary>
         /// Replaces System.Web.UI.Page.IsPostBack property
@@ -137,13 +156,278 @@ namespace nxAjax.UI
             foreach (nxUserControl ctrl in containedUserControls)
                 ctrl.OnLoad(e);
 		}
+        protected virtual void processPostback()
+        {
+            if (Request.QueryString["__id"] != null)
+            {
+                string id = Request.QueryString["__id"];
+                itIsPostBack = true;
+                foreach (nxControl ctrl in this.containedControls)
+                {
+                    if (ctrl.ID == id)
+                    {
+                        string action = Request.QueryString["__action"];
+                        ctrl.RaiseEvent(action, Request.QueryString["__value"].Replace("\\n", "\n").Replace("\\r", "\r"));
+                    }
+                    else if (ctrl is IChildnxControlContainer && id.Contains(ctrl.ID))
+                    {
+                        IChildnxControlContainer iccc = ctrl as IChildnxControlContainer;
+                        nxControl otherControl = iccc.FindInnerControl(id);
+                        if (otherControl != null)
+                        {
+                            string action = Request.QueryString["__action"];
+                            otherControl.RaiseEvent(action, Request.QueryString["__value"].Replace("\\n", "\n").Replace("\\r", "\r"));
+                        }
+                    }
+                }
+            }
+            else if (Request.Form.Count > 0)
+            {
+                ISubmit submitButton = null;
+                itIsPostBack = true;
+                foreach (string key in Request.Form.Keys)
+                {
+                    foreach (nxControl ctrl in this.containedControls)
+                    {
+                        if (ctrl.ID == key)
+                        {
+                            if (ctrl is ISubmit && ctrl.ID == Request.Form["__id"])
+                                submitButton = (ISubmit)ctrl;
 
+                            ctrl.PutPostValue(Request.Form[key]);
+                        }
+                        else if (ctrl is IChildnxControlContainer && key.Contains(ctrl.ID))
+                        {
+                            IChildnxControlContainer iccc = ctrl as IChildnxControlContainer;
+                            nxControl otherControl = iccc.FindInnerControl(key);
+                            if (otherControl != null)
+                            {
+                                if (otherControl is ISubmit && otherControl.ID == Request.Form["__id"])
+                                    submitButton = (ISubmit)otherControl;
+
+                                otherControl.PutPostValue(Request.Form[key]);
+                            }
+                        }
+                    }
+                }
+                if (submitButton != null)
+                    if (submitButton is nxControl)
+                    {
+                        nxControl submitControl = (submitButton as nxControl);
+                        submitControl.RaiseEvent("onClick", submitButton.Value);
+                    }
+            }
+            else
+            {
+                template = new Templates(Server.MapPath(path), lang);
+                try
+                {
+                    if (sPage != "")
+                        template.Load("pageTemplate", sPage);
+                }
+                catch (Exception ex)
+                {
+                    Response.Clear();
+                    Response.Write("No se pudo cargar la Plantilla: ");
+                    Response.Write(ex.Message);
+                    Response.End();
+                }
+            }
+        }
+        #endregion
+        #region Render methods
+        protected override void OnPreRender(System.EventArgs e) { /*Do Nothing*/ }
 		protected override void Render(System.Web.UI.HtmlTextWriter writer)
 		{
-			base.Render(writer);
+            if (!itIsPostBack)
+            {
+                if (template.IsLoaded)
+                    RenderTemplated(writer);
+                else
+                    RenderOverAsp(writer);
+            }
+            else
+                RenderJSOnly(writer);
 		}
-		protected override void OnPreRender(System.EventArgs e)	{ }
-	
+        /// <summary>
+        /// Renders in a string the System.Web.UI.Page Render result
+        /// </summary>
+        /// <returns></returns>
+        protected string baseRenderResult()
+        {
+            string result = string.Empty;
+            System.IO.StringWriter swriter = new System.IO.StringWriter();
+            System.Web.UI.HtmlTextWriter hwriter = new System.Web.UI.HtmlTextWriter(swriter);
+            base.Render(hwriter);
+            hwriter.Close();
+            result = swriter.ToString();
+            swriter.Close();
+            hwriter.Dispose();
+            swriter.Dispose();
+            return result;
+        }
+        /// <summary>
+        /// Only renders js script code
+        /// </summary>
+        /// <param name="writer">writer</param>
+        protected virtual void RenderJSOnly(System.Web.UI.HtmlTextWriter writer)
+        {
+            nxAjaxTextWriter jsWriter = new nxAjaxTextWriter();
+            foreach (nxControl ctrl in containedControls)
+            {
+                ctrl.RenderJS(jsWriter);
+            }
+            writer.Write(jsWriter.ToString()/*.Replace("\n", "\\n").Replace("\r", "\\r")*/);
+            if (code != "")
+            {
+                writer.Write(code);
+                code = "";
+            }
+        }
+        /// <summary>
+        /// Renders over System.Web.UI.Page Render result
+        /// </summary>
+        /// <param name="writer">writer</param>
+        protected virtual void RenderOverAsp(System.Web.UI.HtmlTextWriter writer)
+        {
+            base.Render(writer);
+        }
+        /// <summary>
+        /// Renders Web with Template based system
+        /// </summary>
+        /// <param name="writer">writer</param>
+        protected virtual void RenderTemplated(System.Web.UI.HtmlTextWriter writer)
+        {
+            XmlDocument doc = prepareTemplatedXml();
+            if (doc == null)
+                return;
+
+            bool checkXml = true;
+            foreach(XmlElement e in doc["page"].ChildNodes)
+                if (e.Attributes.Count > 0)
+                {
+                    checkXml = false;
+                    break;
+                }
+
+            if (checkXml)
+                fillTemplateFromXml(doc["page"], template["pageTemplate"]);
+            else
+                fillTemplateFromControlId();
+
+            fillTemplateSpecialTag();
+            writer.Write(template["pageTemplate"].ToString());
+        }
+        /// <summary>
+        /// Fills template from each nxControl ID
+        /// </summary>
+        protected virtual void fillTemplateFromControlId()
+        {
+            foreach (nxControl ctrl in containedControls)
+            {
+                nxAjaxTextWriter wHTML = new nxAjaxTextWriter();
+                ctrl.RenderHTML(wHTML);
+                template["pageTemplate"].Allocate(ctrl.ID, wHTML.ToString());
+            }
+            foreach (nxUserControl ctrl in containedUserControls)
+            {
+                System.IO.StringWriter sw = new System.IO.StringWriter();
+                System.Web.UI.HtmlTextWriter htmlw = new System.Web.UI.HtmlTextWriter((System.IO.TextWriter)sw);
+                ctrl.InternalRender(htmlw);
+                htmlw.Close();
+                template["pageTemplate"].Allocate(ctrl.ID, sw.ToString());
+            }
+        }
+        /// <summary>
+        /// Fills template from Xml Node (recursive)
+        /// </summary>
+        /// <param name="root">Xml Node source</param>
+        /// <param name="t">Template page to fill</param>
+        protected virtual void fillTemplateFromXml(XmlNode root, TemplatePage t)
+        {
+            foreach (XmlNode e in root.ChildNodes)
+            {
+                if (e.Name.ToLower() == "area")
+                {
+                    fillTemplateFromXml(e, t[e.Attributes["id"].Value]);
+                    try
+                    {
+                        if (e.Attributes["method"].Value.ToLower() == "add")
+                            t.Add(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
+                        else
+                            t.Allocate(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
+                    }
+                    catch
+                    {
+                        t.Allocate(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
+                    }
+
+                }
+                else
+                {
+                    t.Allocate(e.Name.ToUpper(), e.InnerXml);
+                }
+            }
+        }
+        /// <summary>
+        /// Fills special template tags (like POSTBACK)
+        /// </summary>
+        protected virtual void fillTemplateSpecialTag()
+        {
+            if (template["pageTemplate"].ContainsKey("POSTSCRIPT"))
+            {
+                template["pageTemplate"].Allocate("POSTSCRIPT", getPostScript());
+                code = "";
+            }
+        }
+        /// <summary>
+        /// Prepares and Creates a new XmlDocument for the template system
+        /// </summary>
+        /// <returns>generated Xml Document</returns>
+        protected virtual XmlDocument prepareTemplatedXml()
+        {
+            string xml = baseRenderResult();
+
+            if (xml.IndexOf("<page>") < 0)
+                xml = "<page>" + xml + "</page>";
+            if (xml.IndexOf("<?xml ") < 0)
+                xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + xml;
+
+            try 
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(xml);
+                return doc;
+            }
+            catch (Exception ex)
+            {
+                //string msg = ex.Message;
+                Response.Clear();
+                Response.Write("Error W3C. Se ha encontrado un error en la conversión a estandar XML, es posible que alguna etiqueta no esté cerrada: " + ex.Message);
+                Response.End();
+                return null;
+            }
+            
+        }
+        /// <summary>
+        /// Gets the post javascript code
+        /// </summary>
+        /// <returns>javascript code</returns>
+        protected virtual string getPostScript()
+        {
+            string postScript = string.Empty;
+            foreach (nxControl ctrl in containedControls)
+            {
+                nxAjaxTextWriter w = new nxAjaxTextWriter();
+                ctrl.RenderJS(w);
+                postScript += w.ToString();
+            }
+            if (code != "")
+                postScript += code;
+            return postScript;
+        }
+        #endregion
+        #region Special javascript Methods
         /// <summary>
         /// Execute an specified javascript code in the next callback response
         /// </summary>
@@ -167,8 +451,9 @@ namespace nxAjax.UI
 		public void DocumentRedirect(string url)
 		{
 			DocumentExecuteJavascript("window.location.href = \"" + url + "\"; ");
-		}
-
+        }
+        #endregion
+        #region Event Javascript Code Generator Methods
         /// <summary>
         /// Returns an nxAjax PostBack code for a control event
         /// </summary>
@@ -201,5 +486,6 @@ namespace nxAjax.UI
 
             return "";
         }
-	}
+        #endregion
+    }
 }

@@ -6,19 +6,23 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
     /// <summary>
-    /// [Not implemented] FileUpload TextBox Control
+    /// FileUpload TextBox Control
     /// <code>
     /// &lt;ajax:FileUpload runat="server"&gt;&lt;/ajax:FileUpload&gt;
     /// </code>
     /// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [ToolboxData("<{0}:FileUpload runat=\"server\"></{0}:FileUpload>")]
     [ToolboxItem(true)]

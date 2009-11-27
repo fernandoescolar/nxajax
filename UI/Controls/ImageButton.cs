@@ -6,16 +6,20 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.Globalization;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
     /// <summary>
     /// ImageButton control (Input type="image")
     /// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [DefaultEventAttribute("ServerClick")]
     [ToolboxData("<{0}:ImageButton runat=\"server\"></{0}:ImageButton>")]

@@ -6,9 +6,11 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -18,10 +20,13 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:Container runat="server"&gt;&lt;/ajax:Container&gt;
     /// </code>
 	/// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [ToolboxData("<{0}:Container runat=\"server\"></{0}:Container>")]
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(System.Web.UI.WebControls.Panel))]
+    [DefaultProperty("ContainedPage")]
 	public class Container : nxContainerControl
 	{
 		public Container() : base("div") { containedpage = ""; }

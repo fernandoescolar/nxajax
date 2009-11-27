@@ -55,4 +55,12 @@ namespace nxAjax.UI
     /// <param name="sender">nxControl sender</param>
     /// <param name="value">value param</param>
     public delegate void nxEventHandler(nxControl sender, string value);
+    /// <summary>
+    /// Standar GridView delegate event handler
+    /// </summary>
+    /// <param name="sender">nxControl sender</param>
+    /// <param name="column">current column</param>
+    /// <param name="row">current row</param>
+    /// <param name="value">value param</param>
+    public delegate void nxGridEventHandler(nxControl sender, int column, int row, string value);
 }

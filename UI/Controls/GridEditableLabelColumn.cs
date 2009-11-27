@@ -22,8 +22,8 @@ namespace nxAjax.UI.Controls
     [ToolboxData("<{0}:GridEditableLabelColumn runat=server></{0}:GridEditableLabelColumn>")]
     public class GridEditableLabelColumn : GridTextboxColumn
     {
-        protected event nxEventHandler mServerEnterEditMode;
-        protected event nxEventHandler mServerExitEditMode;
+        protected event nxGridEventHandler mServerEnterEditMode;
+        protected event nxGridEventHandler mServerExitEditMode;
 
         /// <summary>
         /// Raises on an inner cell enters in edit mode
@@ -31,7 +31,7 @@ namespace nxAjax.UI.Controls
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerExitEditMode
+        public event nxGridEventHandler ServerExitEditMode
         {
             add
             {
@@ -54,7 +54,7 @@ namespace nxAjax.UI.Controls
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerEnterEditMode
+        public event nxGridEventHandler ServerEnterEditMode
         {
             add
             {
@@ -166,13 +166,13 @@ namespace nxAjax.UI.Controls
         protected void item_ServerExitEditMode(nxControl sender, string value)
         {
             if (mServerExitEditMode != null)
-                mServerExitEditMode(sender, value);
+                mServerExitEditMode(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value);
         }
 
         protected void item_ServerEnterEditMode(nxControl sender, string value)
         {
             if (mServerEnterEditMode != null)
-                mServerEnterEditMode(sender, value);
+                mServerEnterEditMode(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value);
         }
 
         public override void ResetColumn(GridView parentGrid)

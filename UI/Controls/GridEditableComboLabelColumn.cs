@@ -22,8 +22,8 @@ namespace nxAjax.UI.Controls
     [ToolboxData("<{0}:GridEditableComboLabelColumn runat=server></{0}:GridEditableComboLabelColumn>")]
     public class GridEditableComboLabelColumn : GridComboboxColumn
     {
-        protected event nxEventHandler mServerExitEditMode;
-        protected event nxEventHandler mServerEnterEditMode;
+        protected event nxGridEventHandler mServerExitEditMode;
+        protected event nxGridEventHandler mServerEnterEditMode;
 
         /// <summary>
         /// Raises on an inner cell enters in edit mode
@@ -31,7 +31,7 @@ namespace nxAjax.UI.Controls
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerExitEditMode
+        public event nxGridEventHandler ServerExitEditMode
         {
             add {
                 mServerExitEditMode += value;
@@ -52,7 +52,7 @@ namespace nxAjax.UI.Controls
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerEnterEditMode
+        public event nxGridEventHandler ServerEnterEditMode
         {
             add
             {
@@ -164,7 +164,7 @@ namespace nxAjax.UI.Controls
             if (mServerExitEditMode != null)
             {
                 putSelectedCellInParent(sender);
-                mServerExitEditMode(sender, value);
+                mServerExitEditMode(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value); 
             }
         }
 
@@ -173,7 +173,7 @@ namespace nxAjax.UI.Controls
             if (mServerEnterEditMode != null)
             {
                 putSelectedCellInParent(sender);
-                mServerEnterEditMode(sender, value);
+                mServerEnterEditMode(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value);
             }
         }
 

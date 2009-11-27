@@ -21,10 +21,8 @@ namespace nxAjax.UI.Controls
     /// </code>
 	/// </summary>
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
-    [AspNetHostingPermission(SecurityAction.Demand,
-    Level = AspNetHostingPermissionLevel.Minimal),
-    AspNetHostingPermission(SecurityAction.InheritanceDemand,
-    Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal),
+    AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [DefaultEventAttribute("ServerClick")]
 	[ToolboxData("<{0}:Button runat=\"server\"></{0}:Button>")]
     [ToolboxItem(true)]
@@ -141,7 +139,6 @@ namespace nxAjax.UI.Controls
             base.RenderAttributes(writer);
         }
 		#endregion
-
 		
 		public override void RaiseEvent(string action, string value)
 		{

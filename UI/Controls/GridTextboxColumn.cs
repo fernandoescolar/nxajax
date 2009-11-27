@@ -34,14 +34,14 @@ namespace nxAjax.UI.Controls
         /// </summary>
         public int MaxLength { get { return mMaxLength; } set { mMaxLength = value; } }
 
-        protected event nxEventHandler mServerChange;
+        protected event nxGridEventHandler mServerChange;
         /// <summary>
         /// Raises on inner Cell value changes
         /// <remarks>
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerChange
+        public event nxGridEventHandler ServerChange
         {
             add
             {
@@ -157,7 +157,7 @@ namespace nxAjax.UI.Controls
             if (mServerChange != null)
             {
                 putSelectedCellInParent(sender);
-                mServerChange(sender, value);
+                mServerChange(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value);
             }
         }
 

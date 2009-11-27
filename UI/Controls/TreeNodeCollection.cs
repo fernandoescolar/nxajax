@@ -7,14 +7,12 @@
  */
 using System;
 using System.Collections;
-using System.ComponentModel;
 
 namespace nxAjax.UI.Controls
 {
 	/// <summary>
 	/// TreeNode Items Collection
 	/// </summary>
-	[DefaultProperty("Text")]
 	public class TreeNodeCollection : CollectionBase
 	{
         /// <summary>

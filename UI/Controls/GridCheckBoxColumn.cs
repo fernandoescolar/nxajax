@@ -21,14 +21,14 @@ namespace nxAjax.UI.Controls
     [ToolboxData("<{0}:GridCheckBoxColumn runat=\"server\"></{0}:GridCheckBoxColumn>")]
     public class GridCheckBoxColumn : GridColumnStyle
     {
-        protected event nxEventHandler mServerClick;
+        protected event nxGridEventHandler mServerClick;
         /// <summary>
         /// Raises on a contained GridCheckBoxCell is clicked
         /// <remarks>
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerClick
+        public event nxGridEventHandler ServerClick
         {
             add
             {
@@ -143,7 +143,7 @@ namespace nxAjax.UI.Controls
         protected void item_ServerClick(nxControl sender, string value)
         {
             if (mServerClick != null)
-                mServerClick(sender, value);
+                mServerClick(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value);
         }
     }
 }

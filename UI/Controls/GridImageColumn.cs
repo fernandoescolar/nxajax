@@ -22,14 +22,14 @@ namespace nxAjax.UI.Controls
     [ToolboxData("<{0}:GridImageColumn runat=\"server\"></{0}:GridImageColumn>")]
     public class GridImageColumn : GridColumnStyle
     {
-        protected event nxEventHandler mServerClick;
+        protected event nxGridEventHandler mServerClick;
         /// <summary>
         /// Raises on a inner image cell is clicked
         /// <remarks>
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerClick
+        public event nxGridEventHandler ServerClick
         {
             add
             {
@@ -138,7 +138,7 @@ namespace nxAjax.UI.Controls
         protected void item_ServerClick(nxControl sender, string value)
         {
             if (mServerClick != null)
-                mServerClick(sender, value);
+                mServerClick(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value);
         }
 
         public override void ResetColumn(GridView parentGrid)

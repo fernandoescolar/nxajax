@@ -6,9 +6,11 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -48,11 +50,14 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:TextBox runat="server"&gt;&lt;/ajax:TextBox&gt;
     /// </code>
     /// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [DefaultEventAttribute("ServerChange")]
 	[ToolboxData("<{0}:TextBox runat=\"server\"></{0}:TextBox>")]
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(System.Web.UI.WebControls.TextBox))]
+    [DefaultProperty("Value")]
 	public class TextBox : InputControl
 	{
 		#region Private Attributes

@@ -29,14 +29,14 @@ namespace nxAjax.UI.Controls
         /// </summary>
         public ComboBoxItemCollection Items { get { return mItems; } }
 
-        protected event nxEventHandler mServerChange;
+        protected event nxGridEventHandler mServerChange;
         /// <summary>
         /// Raises on a Cell Selected item change
         /// <remarks>
         /// It is a server event
         /// </remarks>
         /// </summary>
-        public event nxEventHandler ServerChange
+        public event nxGridEventHandler ServerChange
         {
             add
             {
@@ -180,7 +180,7 @@ namespace nxAjax.UI.Controls
             if (mServerChange != null)
             {
                 putSelectedCellInParent(sender);
-                mServerChange(sender, value);
+                mServerChange(sender, parentGrid.SelectedColumn, parentGrid.SelectedRow, value);
             }
         }
     }

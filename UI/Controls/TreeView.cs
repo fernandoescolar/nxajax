@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -19,6 +20,8 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:TreeView runat="server"&gt;&lt;/ajax:TreeView&gt;
     /// </code>
     /// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
 	[ToolboxData("<{0}:TreeView runat=\"server\"></{0}:TreeView>")]
     [ParseChildren(true, "Nodes")]

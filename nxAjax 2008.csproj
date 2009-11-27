@@ -11,8 +11,7 @@
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
     <AssemblyName>nxAjax</AssemblyName>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>nxAjaxKey.snk</AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
@@ -27,7 +26,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -172,6 +171,8 @@
     </Compile>
     <Compile Include="UI\Controls\IChildnxControlContainer.cs" />
     <Compile Include="UI\Controls\IEditableControl.cs" />
+    <Compile Include="UI\Controls\ISubmit.cs" />
+    <Compile Include="UI\Controls\LinkSubmit.cs" />
     <Compile Include="UI\Controls\nxContainerControl.cs" />
     <Compile Include="UI\Controls\ImageButton.cs" />
     <Compile Include="UI\Controls\InputControl.cs" />
@@ -269,6 +270,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="res\jquery.ajaxupload.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="nxAjaxKey.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

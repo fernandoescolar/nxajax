@@ -16,7 +16,6 @@ namespace nxAjax.UI
 	/// <summary>
     /// nxAjax base control.
 	/// </summary>
-    [ToolboxItem(false)]
     public abstract class nxControl : System.Web.UI.Control, System.Web.UI.IAttributeAccessor
 	{
         /// <summary>

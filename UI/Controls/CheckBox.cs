@@ -6,9 +6,11 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -18,11 +20,14 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:CheckBox runat="server"&gt;&lt;/ajax:CheckBox&gt;
     /// </code>
 	/// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [DefaultEventAttribute("ServerClick")]
     [ToolboxData("<{0}:CheckBox runat=\"server\"></{0}:CheckBox>")]
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(System.Web.UI.WebControls.CheckBox))]
+    [DefaultProperty("Checked")]
 	public class CheckBox : Button
 	{
         /// <summary>

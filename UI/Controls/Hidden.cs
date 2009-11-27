@@ -6,9 +6,11 @@
  * 
  */
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -18,10 +20,13 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:Hidden runat="server"&gt;&lt;/ajax:Hidden&gt;
     /// </code>
 	/// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
 	[ToolboxData("<{0}:Hidden runat=\"server\"></{0}:Hidden>")]
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(Hidden), "images.Hidden.bmp")]
+    [DefaultProperty("Value")]
 	public class Hidden : InputControl
 	{
         /// <summary>

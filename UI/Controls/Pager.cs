@@ -6,11 +6,13 @@
  * 
  */
 using System;
+using System.Web;
 using System.Collections.Generic;
 using System.Text;
 using System.Web.UI;
 using System.ComponentModel;
 using System.Drawing;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -20,6 +22,8 @@ namespace nxAjax.UI.Controls
     /// &lt;ajax:Pager runat="server"&gt;&lt;/ajax:Pager&gt;
     /// </code>
     /// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [DefaultEventAttribute("ServerChange")]
     [ToolboxData("<{0}:Pager runat=\"server\"></{0}:Pager>")]

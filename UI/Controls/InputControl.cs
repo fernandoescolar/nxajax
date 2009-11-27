@@ -7,14 +7,19 @@
  */
 using System;
 using System.ComponentModel;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
     /// <summary>
     /// Base class for input type web controls like &lt;input type="button"... or &lt;input type="text" ...
     /// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [Designer("nxAjax.UI.Design.nxControlDesigner")]
     public abstract class InputControl : nxControl
     {
         /// <summary>

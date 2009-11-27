@@ -11,6 +11,7 @@ using System.Web.UI;
 using System.Drawing;
 using System.Globalization;
 using System.ComponentModel;
+using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
 {
@@ -23,6 +24,8 @@ namespace nxAjax.UI.Controls
     /// &lt;/ajax:ComboBox&gt;
     /// </code>
 	/// </summary>
+    [AspNetHostingPermission(SecurityAction.Demand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     [Designer("nxAjax.UI.Design.nxControlDesigner")]
     [DefaultEvent("ServerChange")]
 	[ToolboxData("<{0}:ComboBox runat=\"server\"></{0}:ComboBox>")]

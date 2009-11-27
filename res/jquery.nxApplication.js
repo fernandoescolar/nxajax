@@ -91,7 +91,7 @@ jQuery.extend({
 			    value = obj.checked;
 		    else if (tipo == 'submit')
 		    {
-			    var temp = obj.form.id;
+		        var temp = $('#' + id).closest("form").attr('id'); // obj.form.id;
 			    this.SubmitForm(temp, id);
 			    return;
 		    }
@@ -151,9 +151,16 @@ jQuery.extend({
 			    alert('there is not Form');
 			    return;
 		    }
-		    var formData = $('#' + f).nxSerialize();
-		    formData = root + '=' + $('#' + root).val() + '&' + formData;
+		    var formData = root + '=';
+		    if ($('#' + root).val())
+		        formData += $('#' + root).val();
+		    else if ($('#' + root).html())
+		        formData += $('#' + root).html();
+		    else
+		        formData += root;	        
+		    formData += '&' + $('#' + f).nxSerialize();
 		    formData = '__id=' + root + '&' + formData + this.getSpecialParam();
+		    
 		    $.ajaxQueue.post(null, {
                     url: $('#' + f).attr('action'),
                     type: 'POST',
