@@ -142,8 +142,34 @@ namespace nxAjax
         {
             return td.Contains(key);
         }
+        /// <summary>
+        /// Returns if an specified key is contained in the keys list
+        /// </summary>
+        /// <param name="key">key name</param>
+        /// <returns></returns>
+        public bool ContainsValueKey(string key)
+        {
+            return vars.ContainsKey(key);
+        }
+        private void loadIncludedFiles()
+        {
+            int position = 0;
+            do
+            {
+                int start = text.IndexOf("<!$INCLUDE ", position);
+                if (start < 0)
+                    break;
+                int end = text.IndexOf(">", start);
+                string fileName = text.Substring(start + 11, end - start - 11);
+                StreamReader reader = new StreamReader(Path.Combine(Path.GetDirectoryName(sPath), fileName));
+                text = text.Replace("<!$INCLUDE " + fileName + ">", reader.ReadToEnd());
+                reader.Close();
+                position = 0;
+            } while (position >= 0);
+        }
 		private void load()
 		{
+            loadIncludedFiles();
 			vars = new StringDictionary();
 			int position = 0;
 			do

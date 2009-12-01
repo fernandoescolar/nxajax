@@ -10,7 +10,6 @@ using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
-using System.ComponentModel;
 using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls

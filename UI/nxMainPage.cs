@@ -78,7 +78,6 @@ namespace nxAjax.UI
             //    }
             //}
             /*Form and postscript*/
-            tempRender = tempRender.Replace("<div>\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"__VIEWSTATE\" value=\"\" />\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"\r\n__VIEWSTATE\" value=\"\" />\r\n</div>\r\n", "");
             int formPos1 = tempRender.ToLower().IndexOf("<form ");
             int formPos2 = tempRender.IndexOf(">", formPos1);
             if (formPos1 >= 0 && formPos2 >= 0)
@@ -118,16 +117,15 @@ namespace nxAjax.UI
             try
             {
                 template["pageTemplate"].Allocate("PRESCRIPT", getScriptHeader());
-                template["pageTemplate"].Allocate("POSTSCRIPT", "<script language=\"javascript\">");
 
                 //old tags... not is necesary...
-                if (template["pageTemplate"].ContainsKey("ONLOAD"))
+                if (template["pageTemplate"].ContainsValueKey("ONLOAD"))
                     template["pageTemplate"].Allocate("ONLOAD", "__start()");
-                
-                if (template["pageTemplate"].ContainsKey("INIT_FORM"))
+
+                if (template["pageTemplate"].ContainsValueKey("INIT_FORM"))
                     template["pageTemplate"].Allocate("INIT_FORM", "<form name=\"frm_" + this.GetType().Name + "\" id=\"frm_" + this.GetType().Name + "\" onSubmit=\"return false;\" method=\"POST\" action=\"" + this.PageUrl + "\">");
 
-                if (template["pageTemplate"].ContainsKey("END_FORM"))
+                if (template["pageTemplate"].ContainsValueKey("END_FORM"))
                     template["pageTemplate"].Allocate("END_FORM", "</form>");
             }
             catch { }

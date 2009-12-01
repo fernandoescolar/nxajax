@@ -115,6 +115,10 @@ namespace nxAjax.UI
             if (lang == null && Application["Language"] != null)
                 if (Application["Language"].GetType() == typeof(Language))
                     lang = (Language)Application["Language"];
+
+            if(lang != null)
+                foreach (nxUserControl ctrl in containedUserControls)
+                    ctrl.lang = lang;
         }
         protected virtual void getIfItIsPostback()
         {
@@ -153,6 +157,7 @@ namespace nxAjax.UI
                 Response.End();
             }
 			base.OnLoad (e);
+
             foreach (nxUserControl ctrl in containedUserControls)
                 ctrl.OnLoad(e);
 		}
@@ -264,6 +269,7 @@ namespace nxAjax.UI
             swriter.Close();
             hwriter.Dispose();
             swriter.Dispose();
+            result = result.Replace("<div>\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"__VIEWSTATE\" value=\"\" />\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"\r\n__VIEWSTATE\" value=\"\" />\r\n</div>\r\n", "");
             return result;
         }
         /// <summary>
@@ -304,11 +310,12 @@ namespace nxAjax.UI
 
             bool checkXml = true;
             foreach(XmlElement e in doc["page"].ChildNodes)
-                if (e.Attributes.Count > 0)
-                {
-                    checkXml = false;
-                    break;
-                }
+                if (e.Name.ToLower() != "form")
+                    if (e.Attributes.Count > 0)
+                    {
+                        checkXml = false;
+                        break;
+                    }
 
             if (checkXml)
                 fillTemplateFromXml(doc["page"], template["pageTemplate"]);
@@ -374,7 +381,7 @@ namespace nxAjax.UI
         /// </summary>
         protected virtual void fillTemplateSpecialTag()
         {
-            if (template["pageTemplate"].ContainsKey("POSTSCRIPT"))
+            if (template["pageTemplate"].ContainsValueKey("POSTSCRIPT"))
             {
                 template["pageTemplate"].Allocate("POSTSCRIPT", getPostScript());
                 code = "";

@@ -43,6 +43,7 @@ namespace nxAjax.UI
 
 		protected override void OnLoad(EventArgs e)
 		{
+            
 			foreach(nxControl ctrl in containedControls)
 			{
 				ctrl.AjaxNotUpdate();
@@ -103,7 +104,7 @@ namespace nxAjax.UI
                 {
                     RenderTemplated(writer);
                     reloadedViewState = false;
-                    if (!template["pageTemplate"].ContainsKey("POSTSCRIPT"))
+                    if (!template["pageTemplate"].ContainsValueKey("POSTSCRIPT"))
                     {
                         writer.Write(getPostScript());
                         code = "";
