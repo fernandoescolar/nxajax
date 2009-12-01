@@ -11,6 +11,8 @@ using System.IO;
 using System.Collections;
 using System.Collections.Specialized;
 
+using nxAjax.Utils;
+
 namespace nxAjax
 {
 	/// <summary>
@@ -156,13 +158,17 @@ namespace nxAjax
             int position = 0;
             do
             {
-                int start = text.IndexOf("<!$INCLUDE ", position);
+                int start = text.IndexOf("<!$INCLUDE ", position, StringComparison.OrdinalIgnoreCase);
                 if (start < 0)
                     break;
                 int end = text.IndexOf(">", start);
                 string fileName = text.Substring(start + 11, end - start - 11);
                 StreamReader reader = new StreamReader(Path.Combine(Path.GetDirectoryName(sPath), fileName));
-                text = text.Replace("<!$INCLUDE " + fileName + ">", reader.ReadToEnd());
+#if VS2008
+                text = text.Replace("<!$INCLUDE " + fileName + ">", reader.ReadToEnd(), StringComparison.OrdinalIgnoreCase);
+#else
+                text = Extensions.Replace(text, "<!$INCLUDE " + fileName + ">", reader.ReadToEnd(), StringComparison.OrdinalIgnoreCase);
+#endif
                 reader.Close();
                 position = 0;
             } while (position >= 0);
@@ -171,21 +177,23 @@ namespace nxAjax
 		{
             loadIncludedFiles();
 			vars = new StringDictionary();
-			int position = 0;
-			do
+            //load areas
+            int position = 0;
+            do
 			{
-				int start = text.IndexOf("<!$BEGIN ", position);
+				int start = text.IndexOf("<!$BEGIN ", position, StringComparison.OrdinalIgnoreCase);
 				if (start<0)
 					break;
 				int end = text.IndexOf(">", start);
 				string pageName = text.Substring(start+9, end-start-9);
-				int end2 = text.IndexOf("<!$END " + pageName + ">", position);
+                int end2 = text.IndexOf("<!$END " + pageName + ">", position, StringComparison.OrdinalIgnoreCase);
 				string pageText = text.Substring(end+1, end2 - end - 1);
 				td.Add(pageName, new TemplatePage(pageName, pageText, lang));
 				position = end2 + ("<!$END " + pageName + ">").Length;
 				text = text.Remove(start, position-start);
 				position = 0;
 			}while(position>=0);
+            //load values
 			position = 0;
 			do
 			{
@@ -234,12 +242,21 @@ namespace nxAjax
 			string temp = text;
 			foreach(string key in vars.Keys)
 			{
-				temp = temp.Replace("<$" + key.ToUpper() + "$>", vars[key]);
+#if VS2008
+				temp = temp.Replace("<$" + key + "$>", vars[key], StringComparison.OrdinalIgnoreCase);
+#else
+                temp = Extensions.Replace(temp, "<$" + key + "$>", vars[key], StringComparison.OrdinalIgnoreCase);
+#endif
+
 			}
 			if (lang != null)
 				foreach(string key in lang.Keys)
 				{
-					temp = temp.Replace("<&" + key.ToLower() + "&>", lang[key]);
+#if VS2008
+                    temp = temp.Replace("<&" + key + "&>", lang[key], StringComparison.OrdinalIgnoreCase);
+#else
+                    temp = Extensions.Replace(temp, "<&" + key + "&>", lang[key], StringComparison.OrdinalIgnoreCase);
+#endif
 				}
 			return temp;
 		}
