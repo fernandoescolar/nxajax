@@ -17,7 +17,7 @@ namespace nxAjax.UI
 	/// nxContainedPage is a WebPage type that it will loaded into a Container Control object.
 	/// It can contains web forms and these can be posted by using an ISubmit nxControl.
     /// <code>
-    /// In the template page it requieres the tag "&lt;$POSTSCRIPT$&gt;".
+    /// In the template page is optional the special tag "&lt;$POSTSCRIPT$&gt;".
     /// </code>
 	/// </summary>
 	public class nxContainedPage : nxPage
@@ -120,7 +120,7 @@ namespace nxAjax.UI
         {
             string tempRender = baseRenderResult();
 
-            tempRender = tempRender.Replace("<div>\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"__VIEWSTATE\" value=\"\" />\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"\r\n__VIEWSTATE\" value=\"\" />\r\n</div>\r\n", "");
+            //tempRender = tempRender.Replace("<div>\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"__VIEWSTATE\" value=\"\" />\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"\r\n__VIEWSTATE\" value=\"\" />\r\n</div>\r\n", "");
 
             int formPos1 = tempRender.IndexOf("<form ");
             int formPos2 = tempRender.IndexOf(">", formPos1);

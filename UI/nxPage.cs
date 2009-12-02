@@ -334,7 +334,7 @@ namespace nxAjax.UI
             {
                 nxAjaxTextWriter wHTML = new nxAjaxTextWriter();
                 ctrl.RenderHTML(wHTML);
-                template["pageTemplate"].Allocate(ctrl.ID, wHTML.ToString());
+                template["pageTemplate"].Allocate(ctrl.BaseID, wHTML.ToString());
             }
             foreach (nxUserControl ctrl in containedUserControls)
             {
@@ -342,7 +342,7 @@ namespace nxAjax.UI
                 System.Web.UI.HtmlTextWriter htmlw = new System.Web.UI.HtmlTextWriter((System.IO.TextWriter)sw);
                 ctrl.InternalRender(htmlw);
                 htmlw.Close();
-                template["pageTemplate"].Allocate(ctrl.ID, sw.ToString());
+                template["pageTemplate"].Allocate(ctrl.BaseID, sw.ToString());
             }
         }
         /// <summary>

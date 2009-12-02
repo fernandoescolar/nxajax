@@ -33,7 +33,7 @@ namespace nxAjax.UI
         /// <summary>
         /// internal strings
         /// </summary>
-        protected string mTagName, mLoadingImg, mLoadingImgID, mLoadingImgCssClass;
+        protected string mTagName, mLoadingImg, mLoadingImgID, mLoadingImgCssClass, originalID;
         /// <summary>
         /// internal attribute collection
         /// </summary>
@@ -50,9 +50,25 @@ namespace nxAjax.UI
             }
             set
             {
+                if (string.IsNullOrEmpty(originalID) && !string.IsNullOrEmpty(base.ID))
+                    originalID = base.ID;
                 base.ID = value;
-                if (mLoadingImg != null)
+                if (!string.IsNullOrEmpty(mLoadingImg))
                     mLoadingImgID = ID + "_loading";
+            }
+        }
+        /// <summary>
+        /// Original ID name
+        /// </summary>
+        public string BaseID
+        {
+            get
+            {
+                return originalID;
+            }
+            internal set
+            {
+                originalID = value;
             }
         }
 
@@ -208,6 +224,7 @@ namespace nxAjax.UI
             mLoadingImg = string.Empty;
             mLoadingImgID = string.Empty;
             mLoadingImgCssClass = string.Empty;
+            originalID = string.Empty;
 		}
 
         //internal static string AttributeToString(int n)

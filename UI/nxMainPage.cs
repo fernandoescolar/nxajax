@@ -14,7 +14,7 @@ namespace nxAjax.UI
 	/// <summary>
 	/// nxMainPage is the main container page (or master page). It provides all javascripts and the engine to nxAjax framework works.
     /// <code>
-    /// In the Template page requiereds the tags: "&lt;$PRESCRIPT$&gt;", "&lt;$ONLOAD$&gt;" and "&lt;$POSTCRIPT$&gt;" in order to works well.
+    /// In the Template page requiereds the tags: "&lt;$PRESCRIPT$&gt;" and "&lt;$POSTCRIPT$&gt;" in order to works well.
     /// </code>
 	/// </summary>
 	public class nxMainPage : nxPage

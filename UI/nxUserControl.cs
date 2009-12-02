@@ -21,8 +21,39 @@ namespace nxAjax.UI
         protected Templates template;
         internal protected Language lang;
         protected nxControlCollection containedControls = new nxControlCollection();
-        protected string path, sPage;
+        protected string path, sPage, originalID;
         protected bool isLoaded = false;
+
+        /// <summary>
+        /// ID name
+        /// </summary>
+        public override string ID
+        {
+            get
+            {
+                return base.ID;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(originalID) && !string.IsNullOrEmpty(base.ID))
+                    originalID = base.ID;
+                base.ID = value;
+            }
+        }
+        /// <summary>
+        /// Original ID name
+        /// </summary>
+        public string BaseID
+        {
+            get
+            {
+                return originalID;
+            }
+            internal set
+            {
+                originalID = value;
+            }
+        }
 
         /// <summary>
         /// Get contained nxControlCollection
@@ -70,7 +101,7 @@ namespace nxAjax.UI
             this.lang = null;
             this.template = null;
             this.EnableViewState = true;
-            this.path = this.sPage = "";
+            this.originalID = this.path = this.sPage = string.Empty;
         }
 
         protected override void AddedControl(System.Web.UI.Control control, int index)
