@@ -310,7 +310,7 @@ namespace nxAjax.UI
 
             bool checkXml = true;
             foreach(XmlElement e in doc["page"].ChildNodes)
-                if (e.Name.ToLower() != "form")
+                if (e.Name.ToLower() != "form" && e.Name.ToLower() != "area")
                     if (e.Attributes.Count > 0)
                     {
                         checkXml = false;
@@ -359,10 +359,18 @@ namespace nxAjax.UI
                     fillTemplateFromXml(e, t[e.Attributes["id"].Value]);
                     try
                     {
-                        if (e.Attributes["method"].Value.ToLower() == "add")
-                            t.Add(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
-                        else
+                        bool allocate = false;
+                        if (e.Attributes["method"] != null)
+                        {
+                            if (e.Attributes["method"].Value.ToLower() == "allocate")
+                                allocate = true;
+                            else if (e.Attributes["method"].Value.ToLower() != "add")
+                                throw new FormatException("Area method name not valid (\"Add\" or \"Allocate\").");
+                        }
+                        if (allocate)
                             t.Allocate(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
+                        else
+                            t.Add(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
                     }
                     catch
                     {
@@ -399,6 +407,9 @@ namespace nxAjax.UI
                 xml = "<page>" + xml + "</page>";
             if (xml.IndexOf("<?xml ") < 0)
                 xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + xml;
+            else //xml tag must be the first line of an xml document
+                xml = xml.Remove(0, xml.IndexOf("<?xml "));
+
 
             try 
             {
@@ -432,6 +443,37 @@ namespace nxAjax.UI
             if (code != "")
                 postScript += code;
             return postScript;
+        }
+        /// <summary>
+        /// Returns nxAjax form tag begin
+        /// </summary>
+        /// <returns></returns>
+        protected string getFormHtmlBegin()
+        {
+            using (nxAjaxTextWriter writer = new nxAjaxTextWriter())
+            {
+                writer.WriteBeginTag("form");
+                writer.WriteAttribute("name", "frm_" + this.GetType().Name);
+                writer.WriteAttribute("id", "frm_" + this.GetType().Name);
+                writer.WriteAttribute("onSubmit", "return false;");
+                writer.WriteAttribute("method", "POST");
+                writer.WriteAttribute("action", this.PageUrl);
+                writer.Write(nxAjaxTextWriter.TagRightChar);
+
+                return writer.ToString();
+            }
+        }
+        /// <summary>
+        /// Returns form end tag
+        /// </summary>
+        /// <returns></returns>
+        protected string getFormHtmlEnd()
+        {
+            using (nxAjaxTextWriter writer = new nxAjaxTextWriter())
+            {
+                writer.WriteEndTag("form");
+                return writer.ToString();
+            }
         }
         #endregion
         #region Special javascript Methods

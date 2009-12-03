@@ -115,7 +115,7 @@ namespace nxAjax.UI.Controls
             writer.WriteBeginTag("span");
             if (CssClass != string.Empty)
                 writer.WriteAttribute("class", CssClass);
-            writer.Write(HtmlTextWriter.TagRightChar);
+            writer.Write(nxAjaxTextWriter.TagRightChar);
 
             if (Value == null)
                 Value = "";

@@ -238,6 +238,7 @@
     <Compile Include="UI\nxUserControlCollection.cs" />
     <Compile Include="Utils\CaptchaImage.cs" />
     <Compile Include="Utils\DataSetHelper.cs" />
+    <Compile Include="Utils\Extensions.cs" />
     <Compile Include="xml\XmlDocument.cs">
       <SubType>Code</SubType>
     </Compile>

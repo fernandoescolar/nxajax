@@ -102,7 +102,9 @@ namespace nxAjax.UI
 					itIsPostBack = false;
                 if (template.IsLoaded)
                 {
+                    writer.Write(getFormHtmlBegin());
                     RenderTemplated(writer);
+                    writer.Write(getFormHtmlEnd());
                     reloadedViewState = false;
                     if (!template["pageTemplate"].ContainsValueKey("POSTSCRIPT"))
                     {
@@ -120,14 +122,12 @@ namespace nxAjax.UI
         {
             string tempRender = baseRenderResult();
 
-            //tempRender = tempRender.Replace("<div>\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"__VIEWSTATE\" value=\"\" />\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"\r\n__VIEWSTATE\" value=\"\" />\r\n</div>\r\n", "");
-
             int formPos1 = tempRender.IndexOf("<form ");
             int formPos2 = tempRender.IndexOf(">", formPos1);
             if (formPos1 >= 0 && formPos2 >= 0)
             {
                 tempRender = tempRender.Remove(formPos1, formPos2 - formPos1 + 1);
-                tempRender = tempRender.Insert(formPos1, "<form name=\"frm_" + this.GetType().Name + "\" id=\"frm_" + this.GetType().Name + "\" onSubmit=\"return false;\" method=\"POST\" action=\"" + this.PageUrl + "\">");
+                tempRender = tempRender.Insert(formPos1, getFormHtmlBegin());
             }
             else
             {
@@ -136,7 +136,7 @@ namespace nxAjax.UI
                 Response.Write("Falta la etiqueta '<form ... runat=\"server\" ...>' que se ejecute en el servidor....");
                 Response.End();
             }
-            formPos1 = tempRender.IndexOf("</form>");
+            formPos1 = tempRender.IndexOf(getFormHtmlEnd());
             if (formPos1 >= 0)
             {
                 tempRender = tempRender.Insert(formPos1 + 7, getPostScript());
@@ -151,11 +151,22 @@ namespace nxAjax.UI
             }
             writer.Write(tempRender);
         }
+
         protected override string getPostScript()
         {
-            return "<INPUT type=\"hidden\" id=\"" + parent + "_CONTAINED_postscript\" name=\"CONTAINED_postscript\" value=\"" + base.getPostScript().Replace("\"", "&#34;") + "\" />";
-        }
+            using (nxAjaxTextWriter writer = new nxAjaxTextWriter())
+            {
+                writer.WriteBeginTag("input");
+                writer.WriteAttribute("type", "hidden");
+                writer.WriteAttribute("id", parent + "_CONTAINED_postscript");
+                writer.WriteAttribute("name", "CONTAINED_postscript");
+                writer.WriteAttribute("value", base.getPostScript().Replace("\"", "&#34;"));
+                writer.Write(nxAjaxTextWriter.SelfClosingTagEnd);
 
+                return writer.ToString();
+            }
+        }
+        
 		protected override System.Collections.Specialized.NameValueCollection DeterminePostBackMode()
 		{
 			System.Collections.Specialized.NameValueCollection aux = base.DeterminePostBackMode();
