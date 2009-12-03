@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.UI;
 using System.Drawing;
 using System.ComponentModel;
+using System.Globalization;
 using System.Security.Permissions;
 
 namespace nxAjax.UI.Controls
@@ -30,7 +31,7 @@ namespace nxAjax.UI.Controls
 	public class DatePicker : TextBox
 	{
 		#region Private Attributes
-		private string imagesFolder, imageSrc;
+		private string imageSrc;
 		#endregion
 
 		#region Public Properties
@@ -54,7 +55,10 @@ namespace nxAjax.UI.Controls
                         if (d == DateTime.MinValue)
                             base.Value = "";
                         else
-                            base.Value = d.ToString("dd/MM/yyyy");
+                        {
+                            DateTimeFormatInfo dfi = CultureInfo.CurrentCulture.DateTimeFormat;
+                            base.Value = d.ToString(dfi.ShortDatePattern, dfi);
+                        }
                     }
                 }
                 catch
@@ -85,7 +89,8 @@ namespace nxAjax.UI.Controls
             set {
                 try
                 {
-                    Value = value.ToString("dd/MM/yyyy");
+                    DateTimeFormatInfo dfi = CultureInfo.CurrentCulture.DateTimeFormat;
+                    Value = value.ToString(dfi.ShortDatePattern, dfi);
                 }
                 catch (FormatException fex)
                 {
@@ -96,18 +101,13 @@ namespace nxAjax.UI.Controls
             } 
         }
         /// <summary>
-        /// Gets/Sets Folder path with all date picker control images
-        /// </summary>
-		[Category("Appearance"), DefaultValue(""), Description("Folder contains DatePicker Images.")]
-		public string ImagesFolder { get { return imagesFolder; } set { imagesFolder = value; }}
-        /// <summary>
         /// Gets/Sets DatePicker Icon Image path 
         /// </summary>
 		[Category("Appearance"), DefaultValue(""), Description("Url DatePicker Image.")]
 		public string ImageSource { get { return imageSrc; } set { imageSrc = value; }}
 		#endregion
 
-		public DatePicker(): base() { Value = DateTime.Now.ToString("dd/MM/yyyy"); imagesFolder = imageSrc = "";  }
+        public DatePicker() : base() { DateTimeFormatInfo dfi = CultureInfo.CurrentCulture.DateTimeFormat; Value = DateTime.Now.ToString(dfi.ShortDatePattern, dfi); imageSrc = ""; }
 
 		#region Renders
 		public override void RenderHTML(nxAjaxTextWriter writer)
@@ -121,12 +121,6 @@ namespace nxAjax.UI.Controls
                 Value = "";
             base.RenderHTML(writer);
 
-            //writer.WriteBeginTag("img");
-            //writer.WriteAttribute("id", "img" + ID);
-            //writer.WriteAttribute("src", imageSrc);
-            //writer.WriteAttribute("border", "0");
-            //writer.Write(nxAjaxTextWriter.SelfClosingTagEnd);
-
             writer.WriteEndTag("span");
 
             if (PostBackMode == PostBackMode.Async && LoadingImg != string.Empty)
@@ -139,7 +133,6 @@ namespace nxAjax.UI.Controls
             base.RenderJS(writer);
 			if (hasChanged)
 			{
-                //writer.Write("ObjVisible('img" + ID + "', " + Visible.ToString().ToLower() + ");");
                 if (Disabled)
                     writer.Write("$('#" + ID + "').datepick('disable');");
                 else
@@ -148,13 +141,10 @@ namespace nxAjax.UI.Controls
 			}
             if (!this.nxPage.IsPostBack)
 			{
-                //writer.Write("LoaddatePicker('" + ID + "', 'img" + ID + "', '" + imagesFolder + "');");
-                writer.Write("$('#" + ID + "').datepick({showOn: 'button', buttonImageOnly: true, buttonImage: '" + imageSrc + "'});");
+                DateTimeFormatInfo dfi = CultureInfo.CurrentCulture.DateTimeFormat;
+                writer.Write("$('#" + ID + "').datepick({showOn: 'button', buttonImageOnly: true, buttonImage: '" + imageSrc + "', dateFormat: '" + dfi.ShortDatePattern.Replace("MM", "mm").Replace("yyyy", "yy") + "'});");
                 if (Disabled)
                     writer.Write("$('#" + ID + "').datepick('disable');");
-                //    writer.Write("$('#img" + ID + "')[0].onclick = function(){};");
-                //if (!Visible)
-                //    writer.Write("ObjVisible('img" + ID + "', " + Visible.ToString().ToLower() + ");");
 			}
            
 		}
@@ -166,14 +156,12 @@ namespace nxAjax.UI.Controls
 			object[] state = (object[])(savedState);
 			base.LoadViewState(state[0]);
 			imageSrc = (string)state[1];
-			imagesFolder = (string)state[2];
 		}
 		protected override object SaveViewState()
 		{
-			object[] state = new object[3];
+			object[] state = new object[2];
 			state[0] = base.SaveViewState();
 			state[1] = imageSrc;
-			state[2] = imagesFolder;
 			return state;
 		}
 		public override void PutPostValue(string obj)

@@ -72,7 +72,7 @@ namespace nxAjax.UI.Controls
             //if (obj == "on")
             //    this.Checked = true;
             //else 
-            if (obj == "checked")
+            if (obj == "checked" || obj == "true")
                 this.Checked = true;
             //else if (obj == "true")
             //    this.Checked = true;
