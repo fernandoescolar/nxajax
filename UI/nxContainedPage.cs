@@ -123,7 +123,8 @@ namespace nxAjax.UI
             string tempRender = baseRenderResult();
 
             int formPos1 = tempRender.IndexOf("<form ");
-            int formPos2 = tempRender.IndexOf(">", formPos1);
+
+            int formPos2 = (formPos1<0)? 0 : tempRender.IndexOf(">", formPos1);
             if (formPos1 >= 0 && formPos2 >= 0)
             {
                 tempRender = tempRender.Remove(formPos1, formPos2 - formPos1 + 1);
@@ -133,7 +134,7 @@ namespace nxAjax.UI
             {
                 Response.Clear();
                 Response.Write("No se pudo cargar: ");
-                Response.Write("Falta la etiqueta '<form ... runat=\"server\" ...>' que se ejecute en el servidor....");
+                Response.Write("Falta la etiqueta '&lt;form ... runat=\"server\" ...&gt;' que se ejecute en el servidor....");
                 Response.End();
             }
             formPos1 = tempRender.IndexOf(getFormHtmlEnd());
@@ -146,7 +147,7 @@ namespace nxAjax.UI
             {
                 Response.Clear();
                 Response.Write("No se pudo cargar: ");
-                Response.Write("Falta el cierre de la etiqueta '<form ... runat=\"server\" ...>': </form>");
+                Response.Write("Falta el cierre de la etiqueta '&lt;form ... runat=\"server\" ...&gt;': </form>");
                 Response.End();
             }
             writer.Write(tempRender);
@@ -160,7 +161,7 @@ namespace nxAjax.UI
                 writer.WriteAttribute("type", "hidden");
                 writer.WriteAttribute("id", parent + "_CONTAINED_postscript");
                 writer.WriteAttribute("name", "CONTAINED_postscript");
-                writer.WriteAttribute("value", base.getPostScript().Replace("\"", "&#34;"));
+                writer.WriteAttribute("value", base.getPostScript().Replace("&quot;", "\\&quot;").Replace("&#34;", "\\&#34;").Replace("\"", "&#34;"));
                 writer.Write(nxAjaxTextWriter.SelfClosingTagEnd);
 
                 return writer.ToString();

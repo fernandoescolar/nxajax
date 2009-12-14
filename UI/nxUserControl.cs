@@ -21,8 +21,14 @@ namespace nxAjax.UI
         protected Templates template;
         internal protected Language lang;
         protected nxControlCollection containedControls = new nxControlCollection();
+        protected nxUserControlCollection containedUserControls = new nxUserControlCollection();
         protected string path, sPage, originalID;
         protected bool isLoaded = false;
+
+        public new bool IsPostBack
+        {
+            get { return nxPage.IsPostBack; }
+        }
 
         /// <summary>
         /// ID name
@@ -54,6 +60,11 @@ namespace nxAjax.UI
                 originalID = value;
             }
         }
+
+        /// <summary>
+        /// Overrides and shadows base Load Event...
+        /// </summary>
+        public new event EventHandler Load;
 
         /// <summary>
         /// Get contained nxControlCollection
@@ -112,6 +123,8 @@ namespace nxAjax.UI
                 control.Page = this.Page;
                 if (control is nxControl)
                     containedControls += (nxControl)control;
+                if (control is nxUserControl)
+                    containedUserControls += (nxUserControl)control;
             }
             catch { }
         }
@@ -135,6 +148,7 @@ namespace nxAjax.UI
                     lang = (Language)Application["Language"];
 
             base.OnLoad(e);
+            this.Load(this, e);
 
             template = new Templates(Server.MapPath(path), lang);
             try
@@ -152,6 +166,23 @@ namespace nxAjax.UI
             isLoaded = true;
         }
 
+        /// <summary>
+        /// Renders in a string the System.Web.UI.Page Render result
+        /// </summary>
+        /// <returns></returns>
+        protected string baseRenderResult()
+        {
+            string result = string.Empty;
+            System.IO.StringWriter swriter = new System.IO.StringWriter();
+            System.Web.UI.HtmlTextWriter hwriter = new System.Web.UI.HtmlTextWriter(swriter);
+            base.Render(hwriter);
+            hwriter.Close();
+            result = swriter.ToString();
+            swriter.Close();
+            hwriter.Dispose();
+            swriter.Dispose();
+            return result;
+        }
         internal void InternalRender(System.Web.UI.HtmlTextWriter writer)
         {
             Render(writer);
@@ -159,51 +190,84 @@ namespace nxAjax.UI
         protected override void Render(System.Web.UI.HtmlTextWriter writer)
         {
             if (template.IsLoaded)
-            {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                System.IO.StringWriter swriter = new System.IO.StringWriter(sb);
-                System.Web.UI.HtmlTextWriter hwriter = new System.Web.UI.HtmlTextWriter(swriter);
-                hwriter.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-                hwriter.WriteLine("<page>");
-                base.Render(hwriter);
-                hwriter.WriteLine("</page>");
-                hwriter.Close();
-                XmlDocument doc = new XmlDocument();
-                try
-                {
-                    XmlTextReader reader = new XmlTextReader(new System.IO.StringReader(sb.ToString()));
-                    reader.Normalization = false;
-                    doc.Load((XmlReader)reader);
-                }
-                catch (Exception ex)
-                {
-                    //string msg = ex.Message;
-                    Response.Clear();
-                    Response.Write("Error W3C. Se ha encontrado un error en la conversión a estandar XML, es posible que alguna etiqueta no esté cerrada: " + ex.Message);
-                    Response.End();
-                    return;
-                }
-                RenderFromXML(doc["page"], template["pageTemplate"]);
-                writer.Write(template["pageTemplate"].ToString());
-            }
+                RenderTemplated(writer);
             else
                 base.Render(writer);
             
         }
+        /// <summary>
+        /// Renders Web with Template based system
+        /// </summary>
+        /// <param name="writer">writer</param>
+        protected virtual void RenderTemplated(System.Web.UI.HtmlTextWriter writer)
+        {
+            XmlDocument doc = prepareTemplatedXml();
+            if (doc == null)
+                return;
 
-        private void RenderFromXML(XmlNode root, TemplatePage t)
+            bool checkXml = true;
+            foreach (XmlElement e in doc["page"].ChildNodes)
+                if (e.Name.ToLower() != "form" && e.Name.ToLower() != "area")
+                    if (e.Attributes.Count > 0)
+                    {
+                        checkXml = false;
+                        break;
+                    }
+
+            if (checkXml)
+                fillTemplateFromXml(doc["page"], template["pageTemplate"]);
+            else
+                fillTemplateFromControlId();
+
+            fillTemplateSpecialTag();
+            writer.Write(template["pageTemplate"].ToString());
+        }
+        /// <summary>
+        /// Fills template from each nxControl ID
+        /// </summary>
+        protected virtual void fillTemplateFromControlId()
+        {
+            foreach (nxControl ctrl in containedControls)
+            {
+                nxAjaxTextWriter wHTML = new nxAjaxTextWriter();
+                ctrl.RenderHTML(wHTML);
+                template["pageTemplate"].Allocate(ctrl.BaseID, wHTML.ToString());
+            }
+            foreach (nxUserControl ctrl in containedUserControls)
+            {
+                System.IO.StringWriter sw = new System.IO.StringWriter();
+                System.Web.UI.HtmlTextWriter htmlw = new System.Web.UI.HtmlTextWriter((System.IO.TextWriter)sw);
+                ctrl.InternalRender(htmlw);
+                htmlw.Close();
+                template["pageTemplate"].Allocate(ctrl.BaseID, sw.ToString());
+            }
+        }
+        /// <summary>
+        /// Fills template from Xml Node (recursive)
+        /// </summary>
+        /// <param name="root">Xml Node source</param>
+        /// <param name="t">Template page to fill</param>
+        protected virtual void fillTemplateFromXml(XmlNode root, TemplatePage t)
         {
             foreach (XmlNode e in root.ChildNodes)
             {
                 if (e.Name.ToLower() == "area")
                 {
-                    RenderFromXML(e, t[e.Attributes["id"].Value]);
+                    fillTemplateFromXml(e, t[e.Attributes["id"].Value]);
                     try
                     {
-                        if (e.Attributes["method"].Value.ToLower() == "add")
-                            t.Add(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
-                        else
+                        bool allocate = false;
+                        if (e.Attributes["method"] != null)
+                        {
+                            if (e.Attributes["method"].Value.ToLower() == "allocate")
+                                allocate = true;
+                            else if (e.Attributes["method"].Value.ToLower() != "add")
+                                throw new FormatException("Area method name not valid (\"Add\" or \"Allocate\").");
+                        }
+                        if (allocate)
                             t.Allocate(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
+                        else
+                            t.Add(e.Attributes["place"].Value.ToString().ToUpper(), t[e.Attributes["id"].InnerText].ToString());
                     }
                     catch
                     {
@@ -212,8 +276,57 @@ namespace nxAjax.UI
 
                 }
                 else
+                {
                     t.Allocate(e.Name.ToUpper(), e.InnerXml);
+                }
             }
+        }
+        /// <summary>
+        /// Fills special template tags (like POSTBACK)
+        /// </summary>
+        protected virtual void fillTemplateSpecialTag()
+        {
+            try
+            {
+                if (template["pageTemplate"].ContainsValueKey("INITFORM"))
+                    template["pageTemplate"].Allocate("INITFORM", this.nxPage.getFormHtmlBegin());
+
+                if (template["pageTemplate"].ContainsValueKey("ENDFORM"))
+                    template["pageTemplate"].Allocate("ENDFORM", this.nxPage.getFormHtmlEnd());
+            }
+            catch { }
+        }
+        /// <summary>
+        /// Prepares and Creates a new XmlDocument for the template system
+        /// </summary>
+        /// <returns>generated Xml Document</returns>
+        protected virtual XmlDocument prepareTemplatedXml()
+        {
+            string xml = baseRenderResult();
+
+            if (xml.IndexOf("<page>") < 0)
+                xml = "<page>" + xml + "</page>";
+            if (xml.IndexOf("<?xml ") < 0)
+                xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + xml;
+            else //xml tag must be the first line of an xml document
+                xml = xml.Remove(0, xml.IndexOf("<?xml "));
+
+
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(xml);
+                return doc;
+            }
+            catch (Exception ex)
+            {
+                //string msg = ex.Message;
+                Response.Clear();
+                Response.Write("Error W3C. Se ha encontrado un error en la conversión a estandar XML, es posible que alguna etiqueta no esté cerrada: " + ex.Message);
+                Response.End();
+                return null;
+            }
+
         }
     }
 }

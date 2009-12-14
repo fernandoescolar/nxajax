@@ -27,6 +27,12 @@ namespace nxAjax.UI
 		protected string path, sPage,code="";
         #endregion
         #region Public Properties
+
+        /// <summary>
+        /// Overrides and shadows base Load Event...
+        /// </summary>
+        public event EventHandler Load;
+
         /// <summary>
         /// Get contained nxControlCollection
         /// </summary>
@@ -156,7 +162,10 @@ namespace nxAjax.UI
                 Response.Write("window.location.reload();");
                 Response.End();
             }
-			base.OnLoad (e);
+			
+            base.OnLoad (e);
+            this.Load(this, e);
+            this.Load = null;
 
             foreach (nxUserControl ctrl in containedUserControls)
                 ctrl.OnLoad(e);
@@ -448,7 +457,7 @@ namespace nxAjax.UI
         /// Returns nxAjax form tag begin
         /// </summary>
         /// <returns></returns>
-        protected string getFormHtmlBegin()
+        internal string getFormHtmlBegin()
         {
             using (nxAjaxTextWriter writer = new nxAjaxTextWriter())
             {
@@ -467,7 +476,7 @@ namespace nxAjax.UI
         /// Returns form end tag
         /// </summary>
         /// <returns></returns>
-        protected string getFormHtmlEnd()
+        internal string getFormHtmlEnd()
         {
             using (nxAjaxTextWriter writer = new nxAjaxTextWriter())
             {

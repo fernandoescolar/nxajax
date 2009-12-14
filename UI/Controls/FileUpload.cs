@@ -30,7 +30,7 @@ namespace nxAjax.UI.Controls
     public class FileUpload : nxContainerControl
     {
         #region Private attributes
-        protected string uploadingMessage;
+        protected string mUploadingMessage;
         protected string badExtensionMessage;
         protected List<string> extensions;
         protected string jsonChange, jsonComplete, jsonSubmit;
@@ -138,8 +138,8 @@ namespace nxAjax.UI.Controls
         /// </summary>
         public string UploadingMessage
         {
-            get { return uploadingMessage; }
-            set { uploadingMessage = value; }
+            get { return mUploadingMessage; }
+            set { mUploadingMessage = value; }
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace nxAjax.UI.Controls
         /// <summary>
         /// Creates a new FileUpload control
         /// </summary>
-        public FileUpload() : base("div") { this.PostBackMode = PostBackMode.Async;  extensions = new List<string>(); badExtensionMessage = uploadingMessage = jsonChange = jsonComplete = jsonSubmit =""; }
+        public FileUpload() : base("div") { this.PostBackMode = PostBackMode.Async;  extensions = new List<string>(); badExtensionMessage = mUploadingMessage = jsonChange = jsonComplete = jsonSubmit =""; }
         #endregion
         #region Render
         protected override void Render(HtmlTextWriter writer)
@@ -220,8 +220,8 @@ namespace nxAjax.UI.Controls
                 if (!string.IsNullOrEmpty(jsonSubmit))
                     writer.Write(jsonSubmit + ";");
 
-                if (!string.IsNullOrEmpty(uploadingMessage))
-                    writer.Write("$('#" + ID + "').html(' " + uploadingMessage.Replace("'", "\\'").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r") + "');");
+                if (!string.IsNullOrEmpty(mUploadingMessage))
+                    writer.Write("$('#" + ID + "').html(' " + mUploadingMessage.Replace("'", "\\'").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r") + "');");
                 
                 if (!string.IsNullOrEmpty(LoadingImgID))
                     writer.Write("if ($('#" + LoadingImgID + "').exists()) $('#" + LoadingImgID + "').fadeIn('slow'); ");
@@ -265,7 +265,7 @@ namespace nxAjax.UI.Controls
             base.LoadViewState(state[0]);
             extensions = (List<string>)state[1];
             badExtensionMessage = (string)state[2];
-            uploadingMessage = (string)state[3];
+            mUploadingMessage = (string)state[3];
             jsonComplete = (string)state[4];
             jsonChange = (string)state[5];
             jsonSubmit = (string)state[6];
@@ -277,7 +277,7 @@ namespace nxAjax.UI.Controls
             state[0] = base.SaveViewState();
             state[1] = extensions;
             state[2] = badExtensionMessage;
-            state[3] = uploadingMessage;
+            state[3] = mUploadingMessage;
             state[4] = jsonComplete;
             state[5] = jsonChange;
             state[6] = jsonSubmit;

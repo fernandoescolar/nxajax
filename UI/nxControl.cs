@@ -64,7 +64,7 @@ namespace nxAjax.UI
         {
             get
             {
-                return originalID;
+                return (string.IsNullOrEmpty(originalID))? ID : originalID;
             }
             internal set
             {
