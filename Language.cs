@@ -122,5 +122,17 @@ namespace nxAjax
 
             return enc;
         }
+        /// <summary>
+        /// Sets a key value
+        /// </summary>
+        /// <param name="key">key</param>
+        /// <param name="value">Literal value for this key</param>
+        public void SetValue(string key, string value)
+        {
+            if (vars.ContainsKey(key))
+                vars[key] = value;
+            else
+                vars.Add(key, value);
+        }
 	}
 }

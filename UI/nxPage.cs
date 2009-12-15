@@ -164,8 +164,11 @@ namespace nxAjax.UI
             }
 			
             base.OnLoad (e);
-            this.Load(this, e);
-            this.Load = null;
+            if (this.Load != null)
+            {
+                this.Load(this, e);
+                this.Load = null;
+            }
 
             foreach (nxUserControl ctrl in containedUserControls)
                 ctrl.OnLoad(e);

@@ -148,7 +148,11 @@ namespace nxAjax.UI
                     lang = (Language)Application["Language"];
 
             base.OnLoad(e);
-            this.Load(this, e);
+            if (this.Load != null)
+            {
+                this.Load(this, e);
+                this.Load = null;
+            }
 
             template = new Templates(Server.MapPath(path), lang);
             try
