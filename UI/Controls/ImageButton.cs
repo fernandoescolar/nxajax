@@ -85,6 +85,6 @@ namespace nxAjax.UI.Controls
         /// <summary>
         /// Creates a new ImageButton
         /// </summary>
-        public ImageButton() : base() { mTagName = "img"; Style.Add("cursor", "pointer"); }
+        public ImageButton() : base() { mTagName = "img"; Style.Add("cursor", "pointer"); Attributes.Remove("type"); }
     }
 }

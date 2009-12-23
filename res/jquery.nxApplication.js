@@ -118,7 +118,7 @@ jQuery.extend({
                     $.nxApplication.loader(false);
                 },
                 success: function(html) { $('#' + id).html(html); $.nxApplication.OnDoneLoadPane(id); },
-                error: function(html) { $('#' + id).html(html); alert('Server Error!'); }
+                error: function(xhr, status, error) { $('#' + id).html(xhr.responseText); $.nxApplication.OnDoneLoadPane(id); alert('Server Error: ' + error); }
             });
         },
         pageload: function(hash) {

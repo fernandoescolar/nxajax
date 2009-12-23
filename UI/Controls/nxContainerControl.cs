@@ -36,7 +36,7 @@ namespace nxAjax.UI.Controls
                 if (Controls.Count == 0)
                     return String.Empty;
 
-                if (Controls.Count == 1)
+                if (Controls.Count >= 1)
                 {
                     Control ctrl = Controls[0];
                     LiteralControl lc = ctrl as LiteralControl;

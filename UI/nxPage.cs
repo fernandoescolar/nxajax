@@ -31,7 +31,7 @@ namespace nxAjax.UI
         /// <summary>
         /// Overrides and shadows base Load Event...
         /// </summary>
-        public event EventHandler Load;
+        public new event EventHandler Load;
 
         /// <summary>
         /// Get contained nxControlCollection
@@ -317,17 +317,19 @@ namespace nxAjax.UI
         protected virtual void RenderTemplated(System.Web.UI.HtmlTextWriter writer)
         {
             XmlDocument doc = prepareTemplatedXml();
-            if (doc == null)
-                return;
-
             bool checkXml = true;
-            foreach(XmlElement e in doc["page"].ChildNodes)
-                if (e.Name.ToLower() != "form" && e.Name.ToLower() != "area")
-                    if (e.Attributes.Count > 0)
-                    {
-                        checkXml = false;
-                        break;
-                    }
+            if (doc != null)
+            {
+                foreach (XmlElement e in doc["page"].ChildNodes)
+                    if (e.Name.ToLower() != "form" && e.Name.ToLower() != "area")
+                        if (e.Attributes.Count > 0)
+                        {
+                            checkXml = false;
+                            break;
+                        }
+            }
+            else
+                checkXml = false;
 
             if (checkXml)
                 fillTemplateFromXml(doc["page"], template["pageTemplate"]);
@@ -432,9 +434,9 @@ namespace nxAjax.UI
             catch (Exception ex)
             {
                 //string msg = ex.Message;
-                Response.Clear();
-                Response.Write("Error W3C. Se ha encontrado un error en la conversión a estandar XML, es posible que alguna etiqueta no esté cerrada: " + ex.Message);
-                Response.End();
+                //Response.Clear();
+                //Response.Write("Error W3C. Se ha encontrado un error en la conversión a estandar XML, es posible que alguna etiqueta no esté cerrada: " + ex.Message);
+                //Response.End();
                 return null;
             }
             

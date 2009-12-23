@@ -38,6 +38,7 @@ namespace nxAjax.UI
         /// internal attribute collection
         /// </summary>
         protected System.Web.UI.AttributeCollection mAttributes;
+        private string htmlRenderedCache = string.Empty;
 
         /// <summary>
         /// ID name
@@ -395,7 +396,13 @@ namespace nxAjax.UI
         /// <param name="writer">HtmlTextWriter</param>
 		protected override void Render(System.Web.UI.HtmlTextWriter writer)
 		{
-			RenderHTML(new nxAjaxTextWriter(writer));
+            if (string.IsNullOrEmpty(htmlRenderedCache))
+            {
+                nxAjaxTextWriter w = new nxAjaxTextWriter();
+                RenderHTML(w);
+                htmlRenderedCache = w.ToString();
+            }
+            writer.Write(htmlRenderedCache);
 		}
 
         /// <summary>
@@ -409,6 +416,7 @@ namespace nxAjax.UI
             if (PostBackMode == PostBackMode.Async && LoadingImg != string.Empty)
                 RenderLoadingImage(writer);
             hasChanged = false;
+            htmlRenderedCache = writer.ToString();
         }
         
         /// <summary>

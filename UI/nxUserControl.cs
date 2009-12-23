@@ -53,7 +53,7 @@ namespace nxAjax.UI
         {
             get
             {
-                return originalID;
+                return (string.IsNullOrEmpty(originalID)) ? ID : originalID;
             }
             internal set
             {
@@ -206,17 +206,19 @@ namespace nxAjax.UI
         protected virtual void RenderTemplated(System.Web.UI.HtmlTextWriter writer)
         {
             XmlDocument doc = prepareTemplatedXml();
-            if (doc == null)
-                return;
-
             bool checkXml = true;
-            foreach (XmlElement e in doc["page"].ChildNodes)
-                if (e.Name.ToLower() != "form" && e.Name.ToLower() != "area")
-                    if (e.Attributes.Count > 0)
-                    {
-                        checkXml = false;
-                        break;
-                    }
+            if (doc != null)
+            {
+                foreach (XmlElement e in doc["page"].ChildNodes)
+                    if (e.Name.ToLower() != "form" && e.Name.ToLower() != "area")
+                        if (e.Attributes.Count > 0)
+                        {
+                            checkXml = false;
+                            break;
+                        }
+            }
+            else
+                checkXml = false;
 
             if (checkXml)
                 fillTemplateFromXml(doc["page"], template["pageTemplate"]);
