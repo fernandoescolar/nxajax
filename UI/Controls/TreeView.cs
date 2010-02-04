@@ -106,7 +106,10 @@ namespace nxAjax.UI.Controls
             writer.WriteAttribute("src", imagesFolder + src);
             writer.WriteAttribute("align", "absmiddle");
             writer.WriteAttribute("border", "0");
+            //XHTML
             writer.Write(nxAjaxTextWriter.SelfClosingTagEnd);
+            //HTML 4.0
+            //writer.Write(nxAjaxTextWriter.TagRightChar);
         }
         private void renderNodeLine(nxAjaxTextWriter writer, TreeNode node)
         {

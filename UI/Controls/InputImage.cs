@@ -113,7 +113,18 @@ namespace nxAjax.UI.Controls
                 writer.Write("$('#" + ID + "').attr('src', '" + Src + "');");
             }
             base.RenderJS(writer);
-            
+        }
+
+        /// <summary>
+        /// Renders Control Attributes HTML code part
+        /// </summary>
+        /// <param name="writer"></param>
+        protected override void RenderAttributes(nxAjaxTextWriter writer)
+        {
+            if (Attributes ["alt"] == null) {
+                writer.WriteAttribute ("alt", ID);
+            }
+            base.RenderAttributes(writer);
         }
     }
 }

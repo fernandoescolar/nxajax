@@ -162,7 +162,10 @@ namespace nxAjax.UI
                 writer.WriteAttribute("id", parent + "_CONTAINED_postscript");
                 writer.WriteAttribute("name", "CONTAINED_postscript");
                 writer.WriteAttribute("value", base.getPostScript().Replace("&quot;", "\\&quot;").Replace("&#34;", "\\&#34;").Replace("\"", "&#34;"));
+                //XHTML
                 writer.Write(nxAjaxTextWriter.SelfClosingTagEnd);
+                //HTML 4.0
+                //writer.Write(nxAjaxTextWriter.TagRightChar);
 
                 return writer.ToString();
             }

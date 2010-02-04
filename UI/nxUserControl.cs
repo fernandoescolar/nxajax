@@ -328,7 +328,7 @@ namespace nxAjax.UI
             {
                 //string msg = ex.Message;
                 Response.Clear();
-                Response.Write("Error W3C. Se ha encontrado un error en la conversión a estandar XML, es posible que alguna etiqueta no esté cerrada: " + ex.Message);
+                Response.Write(nxAjax.Properties.Resources.W3CValidationError + ex.Message);
                 Response.End();
                 return null;
             }

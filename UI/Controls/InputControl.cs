@@ -109,8 +109,10 @@ namespace nxAjax.UI.Controls
         {
             writer.WriteBeginTag(TagName);
             RenderAttributes(writer);
+            //XHTML
             writer.Write(nxAjaxTextWriter.SelfClosingTagEnd);
-
+            //HTML 4.0
+            //writer.Write(nxAjaxTextWriter.TagRightChar);
             if (PostBackMode == PostBackMode.Async && LoadingImg != string.Empty)
                 RenderLoadingImage(writer);
             hasChanged = false;
@@ -135,9 +137,10 @@ namespace nxAjax.UI.Controls
         /// <param name="writer"></param>
         protected override void RenderAttributes(nxAjaxTextWriter writer)
 		{
-			if (Attributes ["name"] == null) {
-				writer.WriteAttribute ("name", Name);
-			}
+            //HTML 4.0 not in XHTML
+            //if (Attributes ["name"] == null) {
+            //    writer.WriteAttribute ("name", Name);
+            //}
 			base.RenderAttributes (writer);
 		}
 

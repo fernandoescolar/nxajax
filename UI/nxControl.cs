@@ -388,7 +388,10 @@ namespace nxAjax.UI
             writer.WriteAttribute("border", "0");
             if (mLoadingImgCssClass != string.Empty)
                 writer.WriteAttribute("class", mLoadingImgCssClass);
+            //XHTML
             writer.Write(nxAjaxTextWriter.SelfClosingTagEnd);
+            //HTML 4.0
+            //writer.Write(nxAjaxTextWriter.TagRightChar);
         }
         /// <summary>
         /// Inherit Render method

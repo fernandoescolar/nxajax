@@ -43,7 +43,7 @@ namespace nxAjax.UI
             int htmlPos = tempRender.ToLower().IndexOf("<html");
             if (htmlPos < 0)
             {
-                tempRender = "<html>" + tempRender;
+                tempRender = "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">" + tempRender;
                 htmlPos = tempRender.ToLower().IndexOf("</html>");
                 if (htmlPos < 0)
                     tempRender += "</html>";
@@ -52,7 +52,7 @@ namespace nxAjax.UI
             htmlPos = tempRender.IndexOf(">", htmlPos);
             int headPos = tempRender.ToLower().IndexOf("<head>");
             if (headPos < 0)
-                tempRender = tempRender.Insert(htmlPos + 1, "<html><head>" + getScriptHeader() + "</head>");
+                tempRender = tempRender.Insert(htmlPos + 1, "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\"><head>" + getScriptHeader() + "</head>");
             else
                 tempRender = tempRender.Insert(headPos + 6, getScriptHeader());
             /*Body*/
@@ -88,8 +88,7 @@ namespace nxAjax.UI
             else
             {
                 Response.Clear();
-                Response.Write("No se pudo cargar: ");
-                Response.Write("Falta la etiqueta '<form ... runat=\"server\" ...>' que se ejecute en el servidor....");
+                Response.Write(nxAjax.Properties.Resources.FormTagError);
                 Response.End();
             }
             formPos1 = tempRender.ToLower().IndexOf(getFormHtmlEnd());
@@ -101,15 +100,14 @@ namespace nxAjax.UI
             else
             {
                 Response.Clear();
-                Response.Write("No se pudo cargar: ");
-                Response.Write("Falta el cierre de la etiqueta '<form ... runat=\"server\" ...>': </form>");
+                Response.Write(nxAjax.Properties.Resources.CloseFormTagError);
                 Response.End();
             }
             writer.Write(tempRender);
         }
         protected override string getPostScript()
         {
-            return "<script language=\"javascript\"> $(document).ready(function(){ __start(); " + base.getPostScript() + "}); </script>";
+            return "<script type=\"text/javascript\"> $(document).ready(function(){ __start(); " + base.getPostScript() + "}); </script>";
         }
         protected override void fillTemplateSpecialTag()
         {
@@ -135,20 +133,20 @@ namespace nxAjax.UI
 		{
             string code = "";
             string url = "nxScriptResource.axd";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery-1.3.2.min.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.cookie.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxqueue.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.datepick.pack.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.treeview.pack.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.history.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.common.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.nxApplication.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxupload.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxTextBox.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.wysiwyg.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxEditable.js") + "\"></script>" + "\n\t";
-            code += "<script language=\"javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxDragnDrop.js") + "\"></script>" + "\n\t";
-			code += "<script language=\"javascript\">" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery-1.3.2.min.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.cookie.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxqueue.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.datepick.pack.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.treeview.pack.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.history.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.common.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.nxApplication.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxupload.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxTextBox.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.wysiwyg.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxEditable.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxDragnDrop.js") + "\"></script>" + "\n\t";
+            code += "<script type=\"text/javascript\">" + "\n\t";
             code += "var initialized = false;" + "\n\t";
 			code += "function __start()" + "\n\t";
 			code += "{" + "\n\t";

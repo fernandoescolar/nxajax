@@ -434,9 +434,9 @@ namespace nxAjax.UI
             catch (Exception ex)
             {
                 //string msg = ex.Message;
-                //Response.Clear();
-                //Response.Write("Error W3C. Se ha encontrado un error en la conversión a estandar XML, es posible que alguna etiqueta no esté cerrada: " + ex.Message);
-                //Response.End();
+                Response.Clear();
+                Response.Write(nxAjax.Properties.Resources.W3CValidationError + ex.Message);
+                Response.End();
                 return null;
             }
             
@@ -467,10 +467,11 @@ namespace nxAjax.UI
             using (nxAjaxTextWriter writer = new nxAjaxTextWriter())
             {
                 writer.WriteBeginTag("form");
-                writer.WriteAttribute("name", "frm_" + this.GetType().Name);
+                //not used in XHMTL
+                //writer.WriteAttribute("name", "frm_" + this.GetType().Name);
                 writer.WriteAttribute("id", "frm_" + this.GetType().Name);
-                writer.WriteAttribute("onSubmit", "return false;");
-                writer.WriteAttribute("method", "POST");
+                writer.WriteAttribute("onsubmit", "return false;");
+                writer.WriteAttribute("method", "post");
                 writer.WriteAttribute("action", this.PageUrl);
                 writer.Write(nxAjaxTextWriter.TagRightChar);
 
