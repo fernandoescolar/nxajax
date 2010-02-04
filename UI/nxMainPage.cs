@@ -133,19 +133,21 @@ namespace nxAjax.UI
 		{
             string code = "";
             string url = "nxScriptResource.axd";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery-1.3.2.min.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.cookie.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxqueue.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.datepick.pack.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.treeview.pack.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.history.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.common.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.nxApplication.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxupload.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxTextBox.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.wysiwyg.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxEditable.js") + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxDragnDrop.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery-1.3.2.min.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.cookie.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxqueue.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.datepick.pack.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.treeview.pack.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.history.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.common.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.nxApplication.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxupload.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxTextBox.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.wysiwyg.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxEditable.js") + "\"></script>" + "\n\t";
+            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxDragnDrop.js") + "\"></script>" + "\n\t";
+            Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            code += "<script type=\"text/javascript\" src=\"" + url + "?src=AjaxScripts&v=" + v.ToString() + "\"></script>" + "\n\t";
             code += "<script type=\"text/javascript\">" + "\n\t";
             code += "var initialized = false;" + "\n\t";
 			code += "function __start()" + "\n\t";
@@ -155,12 +157,12 @@ namespace nxAjax.UI
 			code += "</script>" + "\n";
 			return code;
 		}
-		private string EncodeName(string name)
-		{
-			byte[] encData_byte = new byte[name.Length];
-			encData_byte = System.Text.Encoding.UTF8.GetBytes(name);    
-			string encodedData = Convert.ToBase64String(encData_byte);
-			return encodedData;
-		}
+        //private string EncodeName(string name)
+        //{
+        //    byte[] encData_byte = new byte[name.Length];
+        //    encData_byte = System.Text.Encoding.UTF8.GetBytes(name);    
+        //    string encodedData = Convert.ToBase64String(encData_byte);
+        //    return encodedData;
+        //}
 	}
 }

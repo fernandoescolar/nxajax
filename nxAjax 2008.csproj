@@ -289,6 +289,9 @@
   <ItemGroup>
     <None Include="nxAjaxKey.snk" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Components.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
