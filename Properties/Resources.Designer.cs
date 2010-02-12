@@ -61,6 +61,15 @@ namespace Framework.Ajax.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot load template file.
+        /// </summary>
+        internal static string CannotLoadTemplate {
+            get {
+                return ResourceManager.GetString("CannotLoadTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Close form tag (&apos;&lt;/form&gt;&apos;) is missing..
         /// </summary>
         internal static string CloseFormTagError {

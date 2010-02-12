@@ -108,7 +108,7 @@ namespace Framework.Ajax.UI.Controls
 
         public override void RenderJS(AjaxTextWriter writer)
         {
-            if (hasChanged && AjaxPage.IsPostBack)
+            if (hasChanged && AjaxController.IsPostBack)
             {
                 writer.Write("$('#" + ID + "').attr('src', '" + Src + "');");
             }

@@ -92,12 +92,12 @@ namespace Framework.Ajax.UI.Controls
         public override void RenderJS(AjaxTextWriter writer)
 		{
             base.RenderJS(writer);
-            if (hasChanged || !AjaxPage.IsPostBack)
+            if (hasChanged || !AjaxController.IsPostBack)
             {
                 writer.Write("$('#" + ID + "').html('" + renderJSNodes(nodes, 0).Replace("'", "\\'") + "');");
                 hasChanged = false;
             }
-            if (!AjaxPage.IsPostBack)
+            if (!AjaxController.IsPostBack)
                 writer.Write("$('#" + ID + "').treeview();");
 		}
         private void renderImg(AjaxTextWriter writer, string src)
@@ -122,7 +122,7 @@ namespace Framework.Ajax.UI.Controls
             {
                 writer.WriteBeginTag("a");
                 writer.WriteAttribute("href", "#");
-                writer.WriteAttribute("onclick", AjaxPage.GetPostBackWithValueAjaxEvent(this, "onchange", "'" + node.Value + "'"));
+                writer.WriteAttribute("onclick", AjaxController.GetPostBackWithValueAjaxEvent(this, "onchange", "'" + node.Value + "'"));
                 writer.Write(AjaxTextWriter.TagRightChar);
             }
             
@@ -182,17 +182,17 @@ namespace Framework.Ajax.UI.Controls
 					break;
 			}
 		}
-		protected override void LoadViewState(object savedState)
+		protected override void AjaxLoadViewState(object savedState)
 		{
 			object[] state = (object[])(savedState);
-			base.LoadViewState(state[0]);
+			base.AjaxLoadViewState(state[0]);
 			nodes = (TreeNodeCollection)state[1];
 			selected = (string)state[2];
 		}
-		protected override object SaveViewState()
+		protected override object AjaxSaveViewState()
 		{
 			object[] state = new object[3];
-			state[0] = base.SaveViewState();
+			state[0] = base.AjaxSaveViewState();
 			state[1] = nodes;
 			state[2] = selected;
 			return state;

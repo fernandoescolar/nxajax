@@ -51,6 +51,7 @@ namespace Framework.Ajax.UI.Controls
             editMode = EditMode.OnClick;
             exitEditMode = ExitEditMode.OnBlur;
             mLabel = new Label();
+            mLabel.KeepState = false;
         }
         protected void prepareLabel()
         {
@@ -75,7 +76,7 @@ namespace Framework.Ajax.UI.Controls
             {
                 mLabel.Attributes.Add("onclick", "__editable.ParseToEditMode('" + ID + "');");
                 if (ServerEnterEditMode != null)
-                    mLabel.Attributes["onclick"] += AjaxPage.GetPostBackAjaxEvent(this, "onentereditmode");
+                    mLabel.Attributes["onclick"] += AjaxController.GetPostBackAjaxEvent(this, "onentereditmode");
             }
             mLabel.RenderHTML(writer);
 
@@ -88,14 +89,14 @@ namespace Framework.Ajax.UI.Controls
             prepareLabel();
             base.RenderJS(writer);
 
-            if (!AjaxPage.IsPostBack)
+            if (!AjaxController.IsPostBack)
             {
                 if (exitEditMode != ExitEditMode.Custom)
                 {
                     if (ServerEnterEditMode == null)
                         writer.Write("__editable.AddOnBlurExit('" + ID + "');");
                     else
-                        writer.Write("__editable.AddOnBlurExit('" + ID + "', '" + AjaxPage.GetPostBackAjaxEvent(this, "onexitfrommode").Replace("'", "\\'") + "');");
+                        writer.Write("__editable.AddOnBlurExit('" + ID + "', '" + AjaxController.GetPostBackAjaxEvent(this, "onexitfrommode").Replace("'", "\\'") + "');");
                 }
                 if (exitEditMode == ExitEditMode.OnBlurOrReturn)
                     writer.Write("__editable.AddOnReturnExit('" + ID + "');");
@@ -113,14 +114,14 @@ namespace Framework.Ajax.UI.Controls
 
         public void EnterOnEditMode()
         {
-            AjaxPage.DocumentExecuteJavascript("__editable.ParseToEditMode('" + ID + "');");
+            AjaxController.ExecuteJavascript("__editable.ParseToEditMode('" + ID + "');");
             if (ServerEnterEditMode != null)
                 ServerEnterEditMode(this, Value);
         }
 
         public void ExitFromEditMode()
         {
-            AjaxPage.DocumentExecuteJavascript("__editable.ExitFromEditMode('" + ID + "');");
+            AjaxController.ExecuteJavascript("__editable.ExitFromEditMode('" + ID + "');");
             if (ServerExitEditMode != null)
                 ServerExitEditMode(this, Value);
         }
@@ -147,17 +148,17 @@ namespace Framework.Ajax.UI.Controls
             }
         }
 
-        protected override void LoadViewState(object savedState)
+        protected override void AjaxLoadViewState(object savedState)
         {
             object[] state = (object[])(savedState);
-            base.LoadViewState(state[0]);
+            base.AjaxLoadViewState(state[0]);
             editMode = (EditMode)state[1];
             mLabel.ProtectedLoadViewState(state[2]);
         }
-        protected override object SaveViewState()
+        protected override object AjaxSaveViewState()
         {
             object[] state = new object[3];
-            state[0] = base.SaveViewState();
+            state[0] = base.AjaxSaveViewState();
             state[1] = editMode;
             state[2] = mLabel.ProtectedSaveViewState();
             return state;

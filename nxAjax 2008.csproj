@@ -114,6 +114,9 @@
     <Compile Include="Templates.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\AjaxAttributeCollection.cs" />
+    <Compile Include="UI\AjaxCssStyleCollection.cs" />
+    <Compile Include="UI\AjaxGenericController.cs" />
     <Compile Include="UI\Controls\AutoCompleteTextBox.cs" />
     <Compile Include="UI\Controls\Button.cs">
       <SubType>Code</SubType>
@@ -236,6 +239,8 @@
     <Compile Include="UI\AjaxControlCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\IAjaxController.cs" />
+    <Compile Include="UI\IAjaxControllerContainer.cs" />
     <Compile Include="UI\MainPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>

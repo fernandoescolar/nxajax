@@ -56,12 +56,20 @@ namespace Framework.Ajax.UI.Controls
 
         protected override void Render(HtmlTextWriter writer)
         {
-            this.Value = ID;
+            if (!AjaxController.IsPostBack)
+                this.Value = ID;
+
             base.Render(writer);
         }
         public override void RenderJS(AjaxTextWriter writer)
         {
-            this.Value = ID;
+            if (!AjaxController.IsPostBack || string.IsNullOrEmpty(this.Value))
+            {
+                bool hadChanged = hasChanged;
+                this.Value = ID;
+                if (!hadChanged)
+                    AjaxNotUpdate();
+            }
             base.RenderJS(writer);
             if (hasChanged)
                 writer.Write("$('#" + ID + "').attr( 'checked', " + Checked.ToString().ToLower() + ");");

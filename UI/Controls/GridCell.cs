@@ -57,7 +57,7 @@ namespace Framework.Ajax.UI.Controls
         /// <summary>
         /// Gets Css Style collection
         /// </summary>
-        public System.Web.UI.CssStyleCollection Style { get { return mControl.Style; } }
+        public AjaxCssStyleCollection Style { get { return mControl.Style; } }
 
         /// <summary>
         /// Creates a new GridCell
@@ -85,6 +85,7 @@ namespace Framework.Ajax.UI.Controls
             mControl.Page = parentColumn.ParentGridView.Page;
             mControl.PostBackMode = PostBackMode.Async;
             mControl.LoadingImgID = parentColumn.ParentGridView.LoadingImgID;
+            mControl.KeepState = false;
         }
         /// <summary>
         /// Renders GridCell InnerControl

@@ -66,7 +66,7 @@ namespace Framework.Ajax.UI.Controls
         public override void RenderJS(AjaxTextWriter writer)
         {
             base.RenderJS(writer);
-            if ((hasChanged && AjaxPage.IsPostBack) || (!AjaxPage.IsPostBack))
+            if ((hasChanged && AjaxController.IsPostBack) || (!AjaxController.IsPostBack))
             {
                 writer.Write("__dragndrop.Init('" + ID + "', '" + CssClass + "', '" + SelectedCssClass + "');");
                 foreach (string s in dndpanels)
@@ -139,19 +139,19 @@ namespace Framework.Ajax.UI.Controls
             return GenerateSizes() + "|" + GenerateItems() + "|" + GenerateDisposition();
         }
 
-        protected override void LoadViewState(object savedState)
+        protected override void AjaxLoadViewState(object savedState)
         {
             object[] state = (object[])(savedState);
-            base.LoadViewState(state[0]);
+            base.AjaxLoadViewState(state[0]);
             panels = (List<string>)state[1];
             dndpanels = (List<string>)state[2];
             disposition = (List<string>)state[3];
             sizes = (List<Size>)state[4];
         }
-        protected override object SaveViewState()
+        protected override object AjaxSaveViewState()
         {
             object[] state = new object[5];
-            state[0] = base.SaveViewState();
+            state[0] = base.AjaxSaveViewState();
             state[1] = panels;
             state[2] = dndpanels;
             state[3] = disposition;

@@ -16,55 +16,19 @@ namespace Framework.Ajax.UI
 	/// <summary>
 	/// nxAjax Web Page Base
 	/// </summary>
-	public class AjaxPage : System.Web.UI.Page
+    public class AjaxPage : System.Web.UI.Page, IAjaxControllerContainer
     {
         #region Not public attributes
-        protected bool itIsPostBack = false;
-		protected Templates template;
-		internal protected Language lang;
-		protected AjaxControlCollection containedControls = new AjaxControlCollection();
-        protected AjaxUserControlCollection containedUserControls = new AjaxUserControlCollection();
-		protected string path, sPage,code="";
+        internal AjaxGenericController ajaxController;
+        protected Templates template;
+		protected string path, sPage;
         #endregion
-        #region Public Properties
 
+        #region Public Properties
         /// <summary>
         /// Overrides and shadows base Load Event...
         /// </summary>
         public new event EventHandler Load;
-
-        /// <summary>
-        /// Get contained nxControlCollection
-        /// </summary>
-		public AjaxControlCollection AjaxControls
-		{
-			get
-			{
-				return containedControls;
-			}
-		}
-
-        /// <summary>
-        /// Get contained AjaxUserControlCollection
-        /// </summary>
-        public AjaxUserControlCollection AjaxUserControls
-        {
-            get
-            {
-                return containedUserControls;
-            }
-        }
-
-        /// <summary>
-        /// Get the AjaxPage url
-        /// </summary>
-		public string PageUrl{
-			get { 
-				string[] aux = System.Web.HttpContext.Current.Request.Url.ToString().Split('?');
-				return aux[0];
-			}
-		}
-
         /// <summary>
         /// Get/Set Template file name
         /// </summary>
@@ -78,6 +42,25 @@ namespace Framework.Ajax.UI
 				path = value.Replace(sPage, "");
 			}
         }
+        /// <summary>
+        /// Gets the current language object
+        /// </summary>
+        public Language Lang
+        {
+            get { return ajaxController.Lang; }
+        }
+        /// <summary>
+        /// Gets/Sets ViewState Storage Mode
+        /// </summary>
+        public ViewStateMode ViewStateMode
+        {
+            get { return ajaxController.ViewStateMode; }
+            set { ajaxController.ViewStateMode = value; }
+        }
+        public IAjaxController AjaxController
+        {
+            get { return ajaxController; }
+        }
         #endregion
         #region Factory
         /// <summary>
@@ -85,162 +68,45 @@ namespace Framework.Ajax.UI
         /// </summary>
 		public AjaxPage():base()
 		{
-			this.lang = null;
+            this.ajaxController = new AjaxGenericController(this);
 			this.template = null;
-			this.EnableViewState = true;
-			this.code = "";
+			this.EnableViewState = false;
+            this.EnableEventValidation = false;
+            this.ViewStateEncryptionMode = System.Web.UI.ViewStateEncryptionMode.Never;
+            this.EnableViewStateMac = false;
             this.path = this.sPage = "";
         }
         #endregion
         #region Load Methods
         protected override void AddedControl(System.Web.UI.Control control, int index)
         {
-            try
-            {
-                AddControl(control);
-                control.Page = this;
-                if (control is AjaxControl)
-                    containedControls += (AjaxControl)control;
-                if (control is AjaxUserControl)
-                    containedUserControls += (AjaxUserControl)control;
-            }
-            catch { }
+            ajaxController.AddControl(control);
+            control.Page = this;
         }
-        protected virtual void AddControl(System.Web.UI.Control control)
-        {
-            if (control.Controls.Count > 0 && !(control is IChildAjaxControlContainer))
-                foreach (System.Web.UI.Control c in control.Controls)
-                    AddedControl(c, 0);
-        }
-
-        protected virtual void getLoadedLanguage()
-        {
-            if (lang == null && Session["Language"] != null)
-                if (Session["Language"].GetType() == typeof(Language))
-                    lang = (Language)Session["Language"];
-            if (lang == null && Application["Language"] != null)
-                if (Application["Language"].GetType() == typeof(Language))
-                    lang = (Language)Application["Language"];
-
-            if(lang != null)
-                foreach (AjaxUserControl ctrl in containedUserControls)
-                    ctrl.lang = lang;
-        }
-        protected virtual void getIfItIsPostback()
-        {
-            itIsPostBack = (Request.QueryString["__id"] != null || Request.Form.Count > 0);
-        }
-
-        /// <summary>
-        /// Replaces System.Web.UI.Page.IsPostBack property
-        /// </summary>
-		public new bool IsPostBack
-		{
-            get
-            {
-                return itIsPostBack;
-            }
-		}
-		protected override object LoadPageStateFromPersistenceMedium()
-		{
-			//return base.LoadPageStateFromPersistenceMedium ();
-			return Session["__" + this.GetType().Name + "__ViewState" + "__" + Session.SessionID];
-		}
-		protected override void SavePageStateToPersistenceMedium(object viewState)
-		{
-			//base.SavePageStateToPersistenceMedium (viewState);
-			Session["__" + this.GetType().Name + "__ViewState" + "__" + Session.SessionID] = viewState;
-			ClientScript.RegisterHiddenField("__VIEWSTATE", "");
-		}
 
 		protected override void OnLoad(EventArgs e)
 		{
-            if (IsPostBack && Session["__" + this.GetType().Name + "__ViewState" + "__" + Session.SessionID] == null)
-            {
-                Response.Clear();
-                Response.Write("alert(\"Session expired!\");");
-                Response.Write("window.location.reload();");
-                Response.End();
-            }
-			
+            //if (IsPostBack && Session["__" + this.GetType().Name + "__ViewState" + "__" + Session.SessionID] == null)
+            //{
+            //    Response.Clear();
+            //    Response.Write("alert(\"Session expired!\");");
+            //    Response.Write("window.location.reload();");
+            //    Response.End();
+            //}
+            ajaxController.Init();
             base.OnLoad (e);
             if (this.Load != null)
             {
                 this.Load(this, e);
                 this.Load = null;
             }
-
-            foreach (AjaxUserControl ctrl in containedUserControls)
-                ctrl.OnLoad(e);
+            ajaxController.Load();
 		}
         protected virtual void processPostback()
         {
-            if (Request.QueryString["__id"] != null)
+            if (!ajaxController.IsPostBack)
             {
-                string id = Request.QueryString["__id"];
-                itIsPostBack = true;
-                foreach (AjaxControl ctrl in this.containedControls)
-                {
-                    if (ctrl.ID == id)
-                    {
-                        string action = Request.QueryString["__action"];
-                        ctrl.RaiseEvent(action, Request.QueryString["__value"].Replace("\\n", "\n").Replace("\\r", "\r"));
-                    }
-                    else if (ctrl is IChildAjaxControlContainer && id.Contains(ctrl.ID))
-                    {
-                        IChildAjaxControlContainer iccc = ctrl as IChildAjaxControlContainer;
-                        AjaxControl otherControl = iccc.FindInnerControl(id);
-                        if (otherControl != null)
-                        {
-                            string action = Request.QueryString["__action"];
-                            otherControl.RaiseEvent(action, Request.QueryString["__value"].Replace("\\n", "\n").Replace("\\r", "\r"));
-                        }
-                    }
-                }
-            }
-            else if (Request.Form.Count > 0)
-            {
-                ISubmit submitButton = null;
-                itIsPostBack = true;
-                foreach (string key in Request.Form.Keys)
-                {
-                    if (string.IsNullOrEmpty(key))
-                        continue;
-                    foreach (AjaxControl ctrl in this.containedControls)
-                    {
-                        if (ctrl.ID == key)
-                        {
-                            if (ctrl is ISubmit && ctrl.ID == Request.Form["__id"])
-                                submitButton = (ISubmit)ctrl;
-
-                            ctrl.PutPostValue(Request.Form[key]);
-                            break;
-                        }
-                        else if (ctrl is IChildAjaxControlContainer && key.Contains(ctrl.ID))
-                        {
-                            IChildAjaxControlContainer iccc = ctrl as IChildAjaxControlContainer;
-                            AjaxControl otherControl = iccc.FindInnerControl(key);
-                            if (otherControl != null)
-                            {
-                                if (otherControl is ISubmit && otherControl.ID == Request.Form["__id"])
-                                    submitButton = (ISubmit)otherControl;
-
-                                otherControl.PutPostValue(Request.Form[key]);
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (submitButton != null)
-                    if (submitButton is AjaxControl)
-                    {
-                        AjaxControl submitControl = (submitButton as AjaxControl);
-                        submitControl.RaiseEvent("onClick", submitButton.Value);
-                    }
-            }
-            else
-            {
-                template = new Templates(Server.MapPath(path), lang);
+                template = new Templates(Server.MapPath(path), Lang);
                 try
                 {
                     if (sPage != "")
@@ -249,18 +115,37 @@ namespace Framework.Ajax.UI
                 catch (Exception ex)
                 {
                     Response.Clear();
-                    Response.Write("No se pudo cargar la Plantilla: ");
+                    Response.Write(Properties.Resources.CannotLoadTemplate + ": ");
                     Response.Write(ex.Message);
                     Response.End();
                 }
             }
+            else
+                ajaxController.AjaxRequestProcess();
+        }
+
+        protected override object LoadPageStateFromPersistenceMedium()
+        {
+            ajaxController.CheckPostback();
+            object result = base.LoadPageStateFromPersistenceMedium();
+            if (ViewStateMode != ViewStateMode.InputHidden && ajaxController.IsPostBack)
+                foreach (AjaxControl ac in ajaxController.AjaxControls)
+                    ac.ProtectedLoadViewState(null);
+           
+            return result;
+        }
+        protected override void SavePageStateToPersistenceMedium(object viewState)
+        {
+            if (ViewStateMode != ViewStateMode.InputHidden)
+                foreach (AjaxControl ac in ajaxController.AjaxControls)
+                    ac.ProtectedSaveViewState();
+            base.SavePageStateToPersistenceMedium (viewState);
         }
         #endregion
         #region Render methods
-        protected override void OnPreRender(System.EventArgs e) { /*Do Nothing*/ }
 		protected override void Render(System.Web.UI.HtmlTextWriter writer)
 		{
-            if (!itIsPostBack)
+            if (!ajaxController.IsPostBack)
             {
                 if (template.IsLoaded)
                     RenderTemplated(writer);
@@ -268,7 +153,7 @@ namespace Framework.Ajax.UI
                     RenderOverAsp(writer);
             }
             else
-                RenderJSOnly(writer);
+                ajaxController.AjaxRender();
 		}
         /// <summary>
         /// Renders in a string the System.Web.UI.Page Render result
@@ -288,24 +173,7 @@ namespace Framework.Ajax.UI
             result = result.Replace("<div>\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"__VIEWSTATE\" value=\"\" />\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"\r\n__VIEWSTATE\" value=\"\" />\r\n</div>\r\n", "");
             return result;
         }
-        /// <summary>
-        /// Only renders js script code
-        /// </summary>
-        /// <param name="writer">writer</param>
-        protected virtual void RenderJSOnly(System.Web.UI.HtmlTextWriter writer)
-        {
-            AjaxTextWriter jsWriter = new AjaxTextWriter();
-            foreach (AjaxControl ctrl in containedControls)
-            {
-                ctrl.RenderJS(jsWriter);
-            }
-            writer.Write(jsWriter.ToString()/*.Replace("\n", "\\n").Replace("\r", "\\r")*/);
-            if (code != "")
-            {
-                writer.Write(code);
-                code = "";
-            }
-        }
+        
         /// <summary>
         /// Renders over System.Web.UI.Page Render result
         /// </summary>
@@ -348,13 +216,13 @@ namespace Framework.Ajax.UI
         /// </summary>
         protected virtual void fillTemplateFromControlId()
         {
-            foreach (AjaxControl ctrl in containedControls)
+            foreach (AjaxControl ctrl in ajaxController.AjaxControls)
             {
                 AjaxTextWriter wHTML = new AjaxTextWriter();
                 ctrl.RenderHTML(wHTML);
                 template["pageTemplate"].Allocate(ctrl.BaseID, wHTML.ToString());
             }
-            foreach (AjaxUserControl ctrl in containedUserControls)
+            foreach (AjaxUserControl ctrl in ajaxController.AjaxUserControls)
             {
                 System.IO.StringWriter sw = new System.IO.StringWriter();
                 System.Web.UI.HtmlTextWriter htmlw = new System.Web.UI.HtmlTextWriter((System.IO.TextWriter)sw);
@@ -408,10 +276,7 @@ namespace Framework.Ajax.UI
         protected virtual void fillTemplateSpecialTag()
         {
             if (template["pageTemplate"].ContainsValueKey("POSTSCRIPT"))
-            {
-                template["pageTemplate"].Allocate("POSTSCRIPT", getPostScript());
-                code = "";
-            }
+                template["pageTemplate"].Allocate("POSTSCRIPT", GetPostScript());
         }
         /// <summary>
         /// Prepares and Creates a new XmlDocument for the template system
@@ -446,113 +311,58 @@ namespace Framework.Ajax.UI
             
         }
         /// <summary>
-        /// Gets the post javascript code
+        /// Gets nxAjax form tag begin
         /// </summary>
-        /// <returns>javascript code</returns>
-        protected virtual string getPostScript()
-        {
-            string postScript = string.Empty;
-            foreach (AjaxControl ctrl in containedControls)
-            {
-                AjaxTextWriter w = new AjaxTextWriter();
-                ctrl.RenderJS(w);
-                postScript += w.ToString();
-            }
-            if (code != "")
-                postScript += code;
-            return postScript;
-        }
-        /// <summary>
-        /// Returns nxAjax form tag begin
-        /// </summary>
-        /// <returns></returns>
-        internal string getFormHtmlBegin()
+        /// <param name="writer">Ajax Writer</param>
+        internal string GetFormHtmlBegin()
         {
             using (AjaxTextWriter writer = new AjaxTextWriter())
             {
-                writer.WriteBeginTag("form");
-                //not used in XHMTL
-                //writer.WriteAttribute("name", "frm_" + this.GetType().Name);
-                writer.WriteAttribute("id", "frm_" + this.GetType().Name);
-                writer.WriteAttribute("onsubmit", "return false;");
-                writer.WriteAttribute("method", "post");
-                writer.WriteAttribute("action", this.PageUrl);
-                writer.Write(AjaxTextWriter.TagRightChar);
-
+                ajaxController.WriteAjaxFormBegin("frm_" + this.GetType().Name, writer);
                 return writer.ToString();
             }
         }
         /// <summary>
-        /// Returns form end tag
+        /// Gets form end tag
         /// </summary>
-        /// <returns></returns>
-        internal string getFormHtmlEnd()
+        /// <param name="writer">Ajax Writer</param>
+        internal string GetFormHtmlEnd()
         {
             using (AjaxTextWriter writer = new AjaxTextWriter())
             {
-                writer.WriteEndTag("form");
+                ajaxController.WriteAjaxFormEnd(writer);
                 return writer.ToString();
             }
+        }
+        protected virtual string GetPostScript()
+        {
+            return ajaxController.GetPostbackJavascript();
         }
         #endregion
-        #region Special javascript Methods
+        #region Javascript commands
         /// <summary>
         /// Execute an specified javascript code in the next callback response
         /// </summary>
         /// <param name="lines">Javascript code</param>
-		public void DocumentExecuteJavascript(string lines)
-		{
-            code += lines.Replace("\n", "\\n").Replace("\r", "\\r");
-		}
+        public void ExecuteJavascript(string lines)
+        {
+            ajaxController.ExecuteJavascript(lines);
+        }
         /// <summary>
         /// Shows an alert dialog in the next callback response
         /// </summary>
         /// <param name="msg"></param>
-		public void DocumentAlert(string msg)
-		{
-			DocumentExecuteJavascript("alert(\"" + msg.Replace("\n", "\\n").Replace("\r", "\\r").Replace("\"", "\\\"") + "\"); ");
-		}
+        public void DocumentAlert(string msg)
+        {
+            ajaxController.DocumentAlert(msg);
+        }
         /// <summary>
         /// Redirects to an specified url in the next callback
         /// </summary>
         /// <param name="url">url to redirect</param>
-		public void DocumentRedirect(string url)
-		{
-			DocumentExecuteJavascript("window.location.href = \"" + url + "\"; ");
-        }
-        #endregion
-        #region Event Javascript Code Generator Methods
-        /// <summary>
-        /// Returns an nxAjax PostBack code for a control event
-        /// </summary>
-        /// <param name="ctrl">AjaxControl container</param>
-        /// <param name="_event">name of the event</param>
-        /// <returns>javascript code with the postback call</returns>
-        public virtual string GetPostBackAjaxEvent(AjaxControl ctrl, string _event)
+        public void DocumentRedirect(string url)
         {
-            if (ctrl.PostBackMode == PostBackMode.Sync)
-                return "$.nxApplication.DoPostBack('" + ctrl.ID + "', '" + _event + "', '" + ctrl.AjaxPage.PageUrl + "', false, null);";
-            else if (ctrl.PostBackMode == PostBackMode.Async)
-                return "$.nxApplication.DoPostBack('" + ctrl.ID + "', '" + _event + "', '" + ctrl.AjaxPage.PageUrl + "', true, '" + ctrl.ID + "_loading');";
-            
-            return "";
-            
-        }
-        /// <summary>
-        /// Returns an nxAjax PostBack code for a control event with an specified value
-        /// </summary>
-        /// <param name="ctrl">AjaxControl container</param>
-        /// <param name="_event">name of the event</param>
-        /// <param name="value">value to set</param>
-        /// <returns>javascript code with the postback call</returns>
-        public virtual string GetPostBackWithValueAjaxEvent(AjaxControl ctrl, string _event, string value)
-        {
-            if (ctrl.PostBackMode == PostBackMode.Sync)
-                return "$.nxApplication.DoPostBackWithValue('" + ctrl.ID + "', '" + _event + "', '" + ctrl.AjaxPage.PageUrl + "', " + value + ");";
-            else if (ctrl.PostBackMode == PostBackMode.Async)
-                return "$.nxApplication.DoAsyncPostBackWithValue('" + ctrl.ID + "', '" + _event + "', '" + ctrl.AjaxPage.PageUrl + "', " + value + ", '" + ((ctrl.LoadingImgID != string.Empty) ? ctrl.LoadingImgID : ctrl.ID + "_loading") + "');";
-
-            return "";
+            ajaxController.DocumentRedirect(url);
         }
         #endregion
     }

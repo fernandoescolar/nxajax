@@ -124,7 +124,7 @@ namespace Framework.Ajax.UI.Controls
         public override void RenderJS(AjaxTextWriter writer)
         {
             base.RenderJS(writer);
-            if (AjaxPage.IsPostBack && hasChanged)
+            if (AjaxController.IsPostBack && hasChanged)
             {
                 //writer.Write("EnabledObj('" + ID + "', " + (!Disabled).ToString().ToLower() + ");");
                 writer.Write("$('#" + ID + "').val(\"" + Value.Replace("'", "\\'").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r") + "\");");

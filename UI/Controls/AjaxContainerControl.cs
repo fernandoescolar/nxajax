@@ -88,7 +88,7 @@ namespace Framework.Ajax.UI.Controls
         public override void RenderJS(AjaxTextWriter writer)
         {
             base.RenderJS(writer);
-            if (AjaxPage.IsPostBack && hasChanged)
+            if (AjaxController.IsPostBack && hasChanged)
             {
                 try
                 {
@@ -103,20 +103,20 @@ namespace Framework.Ajax.UI.Controls
             base.RenderAttributes(writer);
         }
 
-        protected override void LoadViewState(object savedState)
+        protected override void AjaxLoadViewState(object savedState)
         {
             object[] state = (object[])(savedState);
-            base.LoadViewState(state[0]);
+            base.AjaxLoadViewState(state[0]);
             try
             {
                 InnerHtml = (string)state[1];
             }
             catch (NotSupportedException ex) { System.Console.WriteLine("Supported exception:" + ex.Message); }
         }
-        protected override object SaveViewState()
+        protected override object AjaxSaveViewState()
         {
             object[] state = new object[2];
-            state[0] = base.SaveViewState();
+            state[0] = base.AjaxSaveViewState();
             try
             {
                 state[1] = InnerHtml;

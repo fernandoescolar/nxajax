@@ -140,17 +140,17 @@ namespace Framework.Ajax.UI.Controls
                     ServerExitEditMode(this, Value);
             }
 
-            protected override void LoadViewState(object savedState)
+            protected override void AjaxLoadViewState(object savedState)
             {
                 object[] state = (object[])(savedState);
-                base.LoadViewState(state[0]);
+                base.AjaxLoadViewState(state[0]);
                 isInEditMode = (bool)state[1];
                 mLabel.ProtectedLoadViewState(state[2]);
             }
-            protected override object SaveViewState()
+            protected override object AjaxSaveViewState()
             {
                 object[] state = new object[3];
-                state[0] = base.SaveViewState();
+                state[0] = base.AjaxSaveViewState();
                 state[1] = isInEditMode;
                 state[2] = mLabel.ProtectedSaveViewState();
                 return state;

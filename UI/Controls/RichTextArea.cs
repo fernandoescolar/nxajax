@@ -37,7 +37,7 @@ namespace Framework.Ajax.UI.Controls
 		{
             base.RenderJS(writer);
 
-            if (!this.AjaxPage.IsPostBack)
+            if (!this.AjaxController.IsPostBack)
 			{
                 writer.Write("$('#" + ID + "').wysiwyg();");
 			}

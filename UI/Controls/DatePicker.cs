@@ -139,7 +139,7 @@ namespace Framework.Ajax.UI.Controls
                     writer.Write("$('#" + ID + "').datepick('enable');");
 				hasChanged = false;
 			}
-            if (!this.AjaxPage.IsPostBack)
+            if (!this.AjaxController.IsPostBack)
 			{
                 DateTimeFormatInfo dfi = CultureInfo.CurrentCulture.DateTimeFormat;
                 writer.Write("$('#" + ID + "').datepick({showOn: 'button', buttonImageOnly: true, buttonImage: '" + imageSrc + "', dateFormat: '" + dfi.ShortDatePattern.Replace("MM", "mm").Replace("yyyy", "yy") + "'});");
@@ -151,16 +151,16 @@ namespace Framework.Ajax.UI.Controls
 		#endregion
 
 		
-		protected override void LoadViewState(object savedState)
+		protected override void AjaxLoadViewState(object savedState)
 		{
 			object[] state = (object[])(savedState);
-			base.LoadViewState(state[0]);
+			base.AjaxLoadViewState(state[0]);
 			imageSrc = (string)state[1];
 		}
-		protected override object SaveViewState()
+		protected override object AjaxSaveViewState()
 		{
 			object[] state = new object[2];
-			state[0] = base.SaveViewState();
+			state[0] = base.AjaxSaveViewState();
 			state[1] = imageSrc;
 			return state;
 		}

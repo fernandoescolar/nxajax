@@ -146,7 +146,7 @@ namespace Framework.Ajax.UI.Controls
 
             if (Page != null && hasEvent("href"))
             {
-                myEvent += AjaxPage.GetPostBackAjaxEvent(this, "onclick");
+                myEvent += AjaxController.GetPostBackAjaxEvent(this, "onclick");
             }
 
             if (myEvent.Length > 0)

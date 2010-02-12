@@ -171,7 +171,7 @@ namespace Framework.Ajax.UI.Controls
         public override void RenderJS(AjaxTextWriter writer)
         {
             base.RenderJS(writer);
-            if (!AjaxPage.IsPostBack)
+            if (!AjaxController.IsPostBack)
             {
                 writer.Write("new AjaxUpload('#" + ID + "', {");
                 writer.Write("action: 'AjaxUploadFile.axd', ");
@@ -197,7 +197,7 @@ namespace Framework.Ajax.UI.Controls
                     writer.Write("} ");
                 }
                 if (ServerChange != null)
-                    writer.Write(AjaxPage.GetPostBackWithValueAjaxEvent(this, "onchange", "file + '.' + extension"));
+                    writer.Write(AjaxController.GetPostBackWithValueAjaxEvent(this, "onchange", "file + '.' + extension"));
                 
                 writer.Write("}, ");
 
@@ -207,7 +207,7 @@ namespace Framework.Ajax.UI.Controls
                     writer.Write(jsonComplete + ";");
 
                 if (ServerComplete != null)
-                    writer.Write(AjaxPage.GetPostBackWithValueAjaxEvent(this, "oncomplete", "file + '.' + extension"));
+                    writer.Write(AjaxController.GetPostBackWithValueAjaxEvent(this, "oncomplete", "file + '.' + extension"));
 
                 if (! string.IsNullOrEmpty(LoadingImgID))
                     writer.Write(" if ($('#" + LoadingImgID + "').exists()) $('#" + LoadingImgID + "').fadeOut('slow'); ");
@@ -227,7 +227,7 @@ namespace Framework.Ajax.UI.Controls
                     writer.Write("if ($('#" + LoadingImgID + "').exists()) $('#" + LoadingImgID + "').fadeIn('slow'); ");
 
                 if (ServerSubmit != null)
-                    writer.Write(AjaxPage.GetPostBackWithValueAjaxEvent(this, "onsubmit", "file + '.' + extension"));
+                    writer.Write(AjaxController.GetPostBackWithValueAjaxEvent(this, "onsubmit", "file + '.' + extension"));
 
                 
                 writer.Write("} });");
@@ -259,10 +259,10 @@ namespace Framework.Ajax.UI.Controls
             }
         }
 
-        protected override void LoadViewState(object savedState)
+        protected override void AjaxLoadViewState(object savedState)
         {
             object[] state = (object[])(savedState);
-            base.LoadViewState(state[0]);
+            base.AjaxLoadViewState(state[0]);
             extensions = (List<string>)state[1];
             badExtensionMessage = (string)state[2];
             mUploadingMessage = (string)state[3];
@@ -271,10 +271,10 @@ namespace Framework.Ajax.UI.Controls
             jsonSubmit = (string)state[6];
         }
 
-        protected override object SaveViewState()
+        protected override object AjaxSaveViewState()
         {
             object[] state = new object[7];
-            state[0] = base.SaveViewState();
+            state[0] = base.AjaxSaveViewState();
             state[1] = extensions;
             state[2] = badExtensionMessage;
             state[3] = mUploadingMessage;

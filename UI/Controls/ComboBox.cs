@@ -307,19 +307,19 @@ namespace Framework.Ajax.UI.Controls
 					break;
 			}
 		}
-		protected override void LoadViewState(object savedState)
+		protected override void AjaxLoadViewState(object savedState)
 		{
 			object[] state = (object[])(savedState);
-			base.LoadViewState(state[0]);
+			base.AjaxLoadViewState(state[0]);
 			mItems = (ComboBoxItemCollection) state[1];
 			selected = (int)state[2];
 
             mItems.Refresh(this);
 		}
-		protected override object SaveViewState()
+		protected override object AjaxSaveViewState()
 		{
 			object[] state = new object[3];
-			state[0] = base.SaveViewState();
+			state[0] = base.AjaxSaveViewState();
 			state[1] = mItems;
 			state[2] = selected;
 			return state;

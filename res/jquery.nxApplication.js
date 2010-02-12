@@ -15,13 +15,18 @@ jQuery.extend({
             }
         },
         getSpecialParamWithName: function(name) {
-            var now = new Date();
-            var times = now.getHours();
-            times += '.' + now.getMinutes();
-            times += '.' + now.getSeconds();
-            return '&' + name + '=' + times;
+            if ($('#' + name).exists()) {
+                return '&' + name + '=' + $('#' + name).val();
+            }
+            else {
+                var now = new Date();
+                var times = now.getHours();
+                times += '.' + now.getMinutes();
+                times += '.' + now.getSeconds();
+                return '&' + name + '=' + (name=='__VIEWSTATE' ? '' : times);
+            }
         },
-        getSpecialParam: function() {
+        getViewState: function() {
             return this.getSpecialParamWithName('__VIEWSTATE');
         },
         purgeValue: function(value) {
@@ -35,9 +40,17 @@ jQuery.extend({
         },
         DoPostBackWithValue: function(id, action, page, value) {
             var val = this.purgeValue(value);
-            var param = '__id=' + id + '&__action=' + action + '&__value=' + val + this.getSpecialParam();
-            $.ajaxQueue.get(null, {
-                url: page + '?' + param,
+            var param = '__id=' + id +
+                        '&__action=' + action +
+                        '&__value=' + val + 
+                        this.getViewState() + 
+                        '&__EVENTTARGET=' + $('#' + id).closest("form").attr('id') +
+                        '&__EVENTARGUMENT=' +
+                        '&__LASTFOCUS=';
+            $.ajaxQueue.post(null, {
+                url: page,
+                type: 'POST',
+                data: param,
                 beforeSend: function(objeto) {
                     //loadingImg FadeIn
                     $.nxApplication.loader(true);
@@ -51,10 +64,18 @@ jQuery.extend({
         },
         DoAsyncPostBackWithValue: function(id, action, page, value, loadingImg) {
             var val = this.purgeValue(value);
-            var param = '__id=' + id + '&__action=' + action + '&__value=' + val + this.getSpecialParam();
+            var param = '__id=' + id +
+                        '&__action=' + action +
+                        '&__value=' + val +
+                        this.getViewState() +
+                        '&__EVENTTARGET=' + $('#' + id).closest("form").attr('id') +
+                        '&__EVENTARGUMENT=' +
+                        '&__LASTFOCUS=';
 
             $.ajax({
-                url: page + '?' + param,
+                url: page,
+                type: 'POST',
+                data: param,
                 beforeSend: function(objeto) {
                     //loadingImg FadeIn
                     if ($('#' + loadingImg).exists())
@@ -147,9 +168,12 @@ jQuery.extend({
                 formData += $('#' + root).html();
             else
                 formData += root;
-            formData += '&' + $('#' + f).nxSerialize();
-            formData = '__id=' + root + '&' + formData + this.getSpecialParam();
-
+            formData += '&' + $('#' + f).nxFixedSerialize();
+            formData = '__id=' + root + '&' + formData +
+                        (($('#__VIEWSTATE').exists()) ? '' : this.getViewState()) +
+                        '&__EVENTTARGET=' + f +
+                        '&__EVENTARGUMENT=' +
+                        '&__LASTFOCUS=';
             $.ajaxQueue.post(null, {
                 url: $('#' + f).attr('action'),
                 type: 'POST',

@@ -133,24 +133,68 @@ jQuery.fn.centerScreen = function(loaded) {
                 }, 200, 'linear');
      }
      return this; //keep chain
- };
- jQuery.fn.nxSerialize = function() {
-     var serialized = this.serialize();
+};
+jQuery.extend({
+    nxParam: function(a) {
+        var s = [];
+        function add(key, value) {
+            // If value is a function, invoke it and return its value
+            value = jQuery.isFunction(value) ? value() : value;
+            s[s.length] = encodeURIComponent(key) + "=" + encodeURIComponent(value);
+        }
+        
+        // Serialize the form elements
+        jQuery.each(a, function() {
+         add(this.id, this.value);
+        });
+        // Return the resulting serialization
+        return s.join("&").replace(/%20/g, "+");
+    }
+});
+jQuery.fn.nxSerialize = function() {
+    return $.nxParam(this.nxSerializeArray());
+};
+jQuery.fn.nxSerializeArray = function() {
+    var rselectTextarea = /select|textarea/i;
+    var rinput = /color|date|datetime|email|hidden|month|number|password|range|search|tel|text|time|url|week/i;
+    
+    return this.map(function() {
+        return this.elements ? jQuery.makeArray(this.elements) : this;
+    })
+        .filter(function() {
+            return this.id && !this.disabled &&
+                (this.checked || rselectTextarea.test(this.nodeName) ||
+                    rinput.test(this.type));
+        })
+        .map(function(i, elem) {
+            var val = jQuery(this).val();
 
-     $(this).find(':checkbox').each(function() {
-         var tofind = $(this).attr('name') + "=" + $(this).val();
-         var toreplace = $(this).attr('name') + "=" + (this.checked ? 'checked' : 'unchecked');
+            return val == null ?
+                null :
+                    jQuery.isArray(val) ?
+                    jQuery.map(val, function(val, i) {
+                        return { id: elem.id, value: val };
+                    }) :
+                    { id: elem.id, value: val };
+        }).get();
+};
+jQuery.fn.nxFixedSerialize = function() {
+    var serialized = this.nxSerialize();
+    $(this).find(':checkbox').each(function() {
+        var tofind = $(this).attr('id') + "=" + $(this).val();
+        var toreplace = $(this).attr('id') + "=" + (this.checked ? 'checked' : 'unchecked');
+        
+        if (this.checked) { serialized = serialized.replace(tofind, toreplace); }
+        else { serialized += ((serialized != '') ? "&" : "") + toreplace; }
+    });
 
-         if (this.checked) { serialized = serialized.replace(tofind, toreplace); }
-         else { serialized += ((serialized != '')? "&" : "") + toreplace; }
-     });
-     
-     $(this).find(':radio').each(function() {
-         var tofind = $(this).attr('name') + "=" + $(this).val();
-         var toreplace = $(this).attr('name') + "=" + (this.checked ? 'checked' : 'unchecked');
+    $(this).find(':radio').each(function() {
+        var tofind = $(this).attr('id') + "=" + $(this).val();
+        var toreplace = $(this).attr('id') + "=" + (this.checked ? 'checked' : 'unchecked');
 
-         if (this.checked) { serialized = serialized.replace(tofind, toreplace); }
-         else { serialized += ((serialized != '') ? "&" : "") + toreplace; }
-     });
-     return serialized;
- }
+        if (this.checked) { serialized = serialized.replace(tofind, toreplace); }
+        else { serialized += ((serialized != '') ? "&" : "") + toreplace; }
+    });
+    return serialized;
+};
+

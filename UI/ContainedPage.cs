@@ -44,28 +44,12 @@ namespace Framework.Ajax.UI
 		protected override void OnLoad(EventArgs e)
 		{
             
-			foreach(AjaxControl ctrl in containedControls)
-			{
+			foreach(AjaxControl ctrl in ajaxController.AjaxControls)
 				ctrl.AjaxNotUpdate();
-				ctrl.ID = this.GetType().Name + "_" + ctrl.ID;
-			}
-            foreach (AjaxUserControl ctrl in containedUserControls)
-            {
-                ctrl.ID = this.GetType().Name + "_" + ctrl.ID;
-            }
 
-            getLoadedLanguage();
-            getIfItIsPostback();
-
-            bool getOldViewSate = false;
-            if (!itIsPostBack && keepViewState && Session["__" + this.GetType().Name + "__ViewState" + "__" + Session.SessionID] != null)
-            {
-                itIsPostBack = true;
-                getOldViewSate = true;
-            }
+            
 			base.OnLoad (e);          
-            if (getOldViewSate)
-                itIsPostBack = false;
+            
 
             if (Request.QueryString["__parent"] != null)
                 parent = Request.QueryString["__parent"];
@@ -73,50 +57,90 @@ namespace Framework.Ajax.UI
             processPostback();
 		}
 
-        protected override void getIfItIsPostback()
+        protected void RenameControl(System.Web.UI.Control control)
         {
-            base.getIfItIsPostback();
+            if (control is AjaxControl || control is AjaxUserControl)
+                control.ID = this.GetType().Name + "_" + control.ID;
+            foreach (System.Web.UI.Control c in control.Controls)
+                RenameControl(c);
+        }
+        protected override void AddedControl(System.Web.UI.Control control, int index)
+        {
+            ajaxController.AddControl(control);
+            RenameControl(control);
+            control.Page = this;
+        }
+        protected object GetViewState(object savedState)
+        {
+            switch (AjaxController.ViewStateMode)
+            {
+                case ViewStateMode.InputHidden:
+                    return savedState;
+                case ViewStateMode.Session:
+                    System.Collections.Hashtable viewState = (Page.Session["__viewState__" + Page.Session.SessionID] as System.Collections.Hashtable);
+                    System.Collections.Hashtable pageViewState = (viewState[Page.GetType().Name] as System.Collections.Hashtable);
+                    return pageViewState[this.ID];
+                case ViewStateMode.Cache:
+                    return null;
+                default:
+                    return null;
+            }
+        }
 
-            if (!itIsPostBack && reloadedViewState)
-                itIsPostBack = true;
+        protected object SetViewState(object savedState)
+        {
+            switch (AjaxController.ViewStateMode)
+            {
+                case ViewStateMode.InputHidden:
+                    return savedState;
+                case ViewStateMode.Session:
+                    System.Collections.Hashtable viewState = (Page.Session["__viewState__" + Page.Session.SessionID] as System.Collections.Hashtable);
+                    System.Collections.Hashtable pageViewState = (viewState[Page.GetType().Name] as System.Collections.Hashtable);
+                    if (pageViewState.ContainsKey(this.ID))
+                        pageViewState[this.ID] = savedState;
+                    else
+                        pageViewState.Add(this.ID, savedState);
+                    return null;
+                case ViewStateMode.Cache:
+                    return null;
+                default:
+                    return null;
+            }
         }
 		protected override void LoadViewState(object savedState)
 		{
-			object[] state = (object[])(savedState);
+            object[] state = (object[])(GetViewState(savedState));
 			base.LoadViewState(state[0]);
 			parent = (string)state[1];
 		}
 		protected override object SaveViewState()
 		{
-			object[] state = new object[3];
+			object[] state = new object[2];
 			state[0] = base.SaveViewState();
 			state[1] = parent;
-			return state;
+            return SetViewState(state);
 		}
 
 		protected override void Render(System.Web.UI.HtmlTextWriter writer)
 		{
-			if (!itIsPostBack || reloadedViewState)
-			{
-				if (reloadedViewState)
-					itIsPostBack = false;
+            if (!ajaxController.IsPostBack || reloadedViewState)
+            {
                 if (template.IsLoaded)
                 {
-                    writer.Write(getFormHtmlBegin());
+                    writer.Write(GetFormHtmlBegin());
                     RenderTemplated(writer);
-                    writer.Write(getFormHtmlEnd());
+                    writer.Write(GetFormHtmlEnd());
                     reloadedViewState = false;
                     if (!template["pageTemplate"].ContainsValueKey("POSTSCRIPT"))
                     {
-                        writer.Write(getPostScript());
-                        code = "";
+                        writer.Write(GetPostScript());
                     }
                 }
                 else
                     RenderOverAsp(writer);
-			}
-			else
-                RenderJSOnly(writer);
+            }
+            else
+                ajaxController.AjaxRender();
 		}
         protected override void RenderOverAsp(System.Web.UI.HtmlTextWriter writer)
         {
@@ -128,32 +152,30 @@ namespace Framework.Ajax.UI
             if (formPos1 >= 0 && formPos2 >= 0)
             {
                 tempRender = tempRender.Remove(formPos1, formPos2 - formPos1 + 1);
-                tempRender = tempRender.Insert(formPos1, getFormHtmlBegin());
+                tempRender = tempRender.Insert(formPos1, GetFormHtmlBegin());
             }
             else
             {
                 Response.Clear();
-                Response.Write("No se pudo cargar: ");
-                Response.Write("Falta la etiqueta '&lt;form ... runat=\"server\" ...&gt;' que se ejecute en el servidor....");
+                Response.Write(Properties.Resources.FormTagError);
                 Response.End();
             }
-            formPos1 = tempRender.IndexOf(getFormHtmlEnd());
+            formPos1 = tempRender.IndexOf(GetFormHtmlEnd());
             if (formPos1 >= 0)
             {
-                tempRender = tempRender.Insert(formPos1 + 7, getPostScript());
-                code = "";
+                tempRender = tempRender.Insert(formPos1 + 7, GetPostScript());
             }
             else
             {
                 Response.Clear();
-                Response.Write("No se pudo cargar: ");
-                Response.Write("Falta el cierre de la etiqueta '&lt;form ... runat=\"server\" ...&gt;': </form>");
+                Response.Write(Properties.Resources.CloseFormTagError);
                 Response.End();
             }
+            tempRender = tempRender.Replace("\r\n<div>\r\n<input type=\"hidden\" name=\"__VIEWSTATE\" id=\"\r\n__VIEWSTATE\" value=\"\" />\r\n</div>", "");
             writer.Write(tempRender);
         }
 
-        protected override string getPostScript()
+        protected override string GetPostScript()
         {
             using (AjaxTextWriter writer = new AjaxTextWriter())
             {
@@ -161,7 +183,7 @@ namespace Framework.Ajax.UI
                 writer.WriteAttribute("type", "hidden");
                 writer.WriteAttribute("id", parent + "_CONTAINED_postscript");
                 writer.WriteAttribute("name", "CONTAINED_postscript");
-                writer.WriteAttribute("value", base.getPostScript().Replace("&quot;", "\\&quot;").Replace("&#34;", "\\&#34;").Replace("\"", "&#34;"));
+                writer.WriteAttribute("value", base.GetPostScript().Replace("&quot;", "\\&quot;").Replace("&#34;", "\\&#34;").Replace("\"", "&#34;"));
                 //XHTML
                 writer.Write(AjaxTextWriter.SelfClosingTagEnd);
                 //HTML 4.0
@@ -184,6 +206,20 @@ namespace Framework.Ajax.UI
 			}
 			return aux;
 		}
+        protected override object LoadPageStateFromPersistenceMedium()
+        {
+            object result = base.LoadPageStateFromPersistenceMedium();
+            if (ViewStateMode != ViewStateMode.InputHidden && ajaxController.IsPostBack)
+                LoadViewState(null);
+            return result;
+        }
+        protected override void SavePageStateToPersistenceMedium(object viewState)
+        {
+            if (ViewStateMode != ViewStateMode.InputHidden)
+                base.SavePageStateToPersistenceMedium(null);
+            else
+                base.SavePageStateToPersistenceMedium(viewState);
+        }
 
         /// <summary>
         /// Loads other ContainedPage into the parent Container in the next callback response
@@ -192,10 +228,7 @@ namespace Framework.Ajax.UI
         /// <param name="param">QueryString params</param>
 		public void ParentLoadPage(string url, string param)
 		{
-			lock(code)
-			{
-                code += "$.nxApplication.LoadPane('" + parent + "', '" + url + "', '" + param + "');";
-			}
+            ajaxController.ExecuteJavascript("$.nxApplication.LoadPane('" + parent + "', '" + url + "', '" + param + "');");
 		}
         /// <summary>
         /// Loads other ContainedPage into the parent Container in the next callback response
@@ -211,7 +244,6 @@ namespace Framework.Ajax.UI
         /// </summary>
 		public ContainedPage() : base()
 		{
-			this.lang = null;
 			this.template = null;
 			this.EnableViewState = true;
 		}

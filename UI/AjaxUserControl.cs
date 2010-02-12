@@ -18,18 +18,44 @@ namespace Framework.Ajax.UI
     /// </summary>
     public class AjaxUserControl : System.Web.UI.UserControl
     {
+        private IAjaxController ajaxControllerCache = null;
         protected Templates template;
-        internal protected Language lang;
-        protected AjaxControlCollection containedControls = new AjaxControlCollection();
-        protected AjaxUserControlCollection containedUserControls = new AjaxUserControlCollection();
         protected string path, sPage, originalID;
         protected bool isLoaded = false;
 
-        public new bool IsPostBack
+        /// <summary>
+        /// Parent AjaxPage 
+        /// </summary>
+        public virtual IAjaxController AjaxController
         {
-            get { return AjaxPage.IsPostBack; }
+            get
+            {
+                if (ajaxControllerCache == null)
+                {
+                    if (base.Page is IAjaxControllerContainer)
+                        ajaxControllerCache = (base.Page as IAjaxControllerContainer).AjaxController;
+                    else if (base.Page.Form is IAjaxController)
+                        ajaxControllerCache = (base.Page.Form as IAjaxControllerContainer).AjaxController;
+                    else
+                    {
+                        lock (base.Page.Controls)
+                        {
+                            foreach (System.Web.UI.Control c in base.Page.Controls)
+                                if (c is IAjaxControllerContainer)
+                                    ajaxControllerCache = (c as IAjaxControllerContainer).AjaxController;
+                        }
+                    }
+                }
+                return ajaxControllerCache;
+            }
         }
-
+        /// <summary>
+        /// Gets the current language object
+        /// </summary>
+        public Language Lang
+        {
+            get { return AjaxController.Lang; }
+        }
         /// <summary>
         /// ID name
         /// </summary>
@@ -67,30 +93,6 @@ namespace Framework.Ajax.UI
         public new event EventHandler Load;
 
         /// <summary>
-        /// Get contained AjaxControlCollection
-        /// </summary>
-        public AjaxControlCollection AjaxControls
-        {
-            get
-            {
-                return containedControls;
-            }
-        }
-        /// <summary>
-        /// Get/Set Parent AjaxPage
-        /// </summary>
-        public AjaxPage AjaxPage
-        {
-            get
-            {
-                return (AjaxPage)base.Page;
-            }
-            set
-            {
-                base.Page = value;
-            }
-        }
-        /// <summary>
         /// Get/Set Template file name
         /// </summary>
         [Category("Content"), DefaultValue(null)]
@@ -109,52 +111,33 @@ namespace Framework.Ajax.UI
         /// </summary>
         public AjaxUserControl()
         {
-            this.lang = null;
             this.template = null;
             this.EnableViewState = true;
             this.originalID = this.path = this.sPage = string.Empty;
         }
-
+        protected void RenameControl(System.Web.UI.Control control)
+        {
+            if (control is AjaxControl || control is AjaxUserControl)
+                control.ID = this.GetType().Name + "_" + control.ID;
+            foreach (System.Web.UI.Control c in control.Controls)
+                RenameControl(c);
+        }
         protected override void AddedControl(System.Web.UI.Control control, int index)
         {
-            try
-            {
-                AddControl(control);
-                control.Page = this.Page;
-                if (control is AjaxControl)
-                    containedControls += (AjaxControl)control;
-                if (control is AjaxUserControl)
-                    containedUserControls += (AjaxUserControl)control;
-            }
-            catch { }
+            AjaxController.AddControl(control);
+            RenameControl(control);
+            control.Page = this.Page;
         }
-        protected virtual void AddControl(System.Web.UI.Control control)
-        {
-            if (control.Controls.Count > 0 && !(control is IChildAjaxControlContainer))
-                foreach (System.Web.UI.Control c in control.Controls)
-                    AddedControl(c, 0);
-        }
-
+       
         internal new void OnLoad(EventArgs e)
         {
-            if (isLoaded)
-                return;
-
-            if (lang == null && Session["Language"] != null)
-                if (Session["Language"].GetType() == typeof(Language))
-                    lang = (Language)Session["Language"];
-            if (lang == null && Application["Language"] != null)
-                if (Application["Language"].GetType() == typeof(Language))
-                    lang = (Language)Application["Language"];
-
             base.OnLoad(e);
             if (this.Load != null)
             {
                 this.Load(this, e);
                 this.Load = null;
             }
-
-            template = new Templates(Server.MapPath(path), lang);
+            template = new Templates(Server.MapPath(path), Lang);
             try
             {
                 if (sPage != "")
@@ -233,13 +216,13 @@ namespace Framework.Ajax.UI
         /// </summary>
         protected virtual void fillTemplateFromControlId()
         {
-            foreach (AjaxControl ctrl in containedControls)
+            foreach (AjaxControl ctrl in AjaxController.AjaxControls)
             {
                 AjaxTextWriter wHTML = new AjaxTextWriter();
                 ctrl.RenderHTML(wHTML);
                 template["pageTemplate"].Allocate(ctrl.BaseID, wHTML.ToString());
             }
-            foreach (AjaxUserControl ctrl in containedUserControls)
+            foreach (AjaxUserControl ctrl in AjaxController.AjaxUserControls)
             {
                 System.IO.StringWriter sw = new System.IO.StringWriter();
                 System.Web.UI.HtmlTextWriter htmlw = new System.Web.UI.HtmlTextWriter((System.IO.TextWriter)sw);
@@ -295,10 +278,10 @@ namespace Framework.Ajax.UI
             try
             {
                 if (template["pageTemplate"].ContainsValueKey("INITFORM"))
-                    template["pageTemplate"].Allocate("INITFORM", this.AjaxPage.getFormHtmlBegin());
+                    template["pageTemplate"].Allocate("INITFORM", GetFormHtmlBegin());
 
                 if (template["pageTemplate"].ContainsValueKey("ENDFORM"))
-                    template["pageTemplate"].Allocate("ENDFORM", this.AjaxPage.getFormHtmlEnd());
+                    template["pageTemplate"].Allocate("ENDFORM", GetFormHtmlEnd());
             }
             catch { }
         }
@@ -332,7 +315,30 @@ namespace Framework.Ajax.UI
                 Response.End();
                 return null;
             }
-
+        }
+        /// <summary>
+        /// Gets nxAjax form tag begin
+        /// </summary>
+        /// <param name="writer">Ajax Writer</param>
+        internal string GetFormHtmlBegin()
+        {
+            using (AjaxTextWriter writer = new AjaxTextWriter())
+            {
+                AjaxController.WriteAjaxFormBegin("frm_" + this.GetType().Name, writer);
+                return writer.ToString();
+            }
+        }
+        /// <summary>
+        /// Gets form end tag
+        /// </summary>
+        /// <param name="writer">Ajax Writer</param>
+        internal string GetFormHtmlEnd()
+        {
+            using (AjaxTextWriter writer = new AjaxTextWriter())
+            {
+                AjaxController.WriteAjaxFormEnd(writer);
+                return writer.ToString();
+            }
         }
     }
 }

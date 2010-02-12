@@ -149,7 +149,7 @@ namespace Framework.Ajax.UI.Controls
 		{
 			string func = "";
             if (ServerChange != null)
-                func += AjaxPage.GetPostBackWithValueAjaxEvent(this, "onchange", "'{%$&#}'");
+                func += AjaxController.GetPostBackWithValueAjaxEvent(this, "onchange", "'{%$&#}'");
 
 
 			if (func != "")
@@ -192,7 +192,7 @@ namespace Framework.Ajax.UI.Controls
 		{
             base.RenderJS(writer);
 
-			if(this.hasChanged || !AjaxPage.IsPostBack)
+			if(this.hasChanged || !AjaxController.IsPostBack)
 			{
                 writer.Write("$('#" + ID + "').html(' " + RenderUL().Replace("'", "\\'").Replace("\n", "\\n\\r") + "');");
                 hasChanged = false;
@@ -210,19 +210,19 @@ namespace Framework.Ajax.UI.Controls
 					break;
 			}
 		}
-		protected override void LoadViewState(object savedState)
+		protected override void AjaxLoadViewState(object savedState)
 		{
 			object[] state = (object[])(savedState);
-			base.LoadViewState(state[0]);
+			base.AjaxLoadViewState(state[0]);
 			menus = (MenuItemCollection)state[1];
 			itemCssClass = (string)state[2];
 			sItemCssClass = (string)state[3];
 			selectedValue = (string)state[4];
 		}
-		protected override object SaveViewState()
+		protected override object AjaxSaveViewState()
 		{
 			object[] state = new object[5];
-			state[0] = base.SaveViewState();
+			state[0] = base.AjaxSaveViewState();
 			state[1] = menus;
 			state[2] = itemCssClass;
 			state[3] = sItemCssClass;

@@ -26,11 +26,9 @@ namespace Framework.Ajax.UI
 
 		protected override void OnLoad(EventArgs e)
 		{
-			foreach(AjaxControl ctrl in containedControls)
+			foreach(AjaxControl ctrl in AjaxController.AjaxControls)
 				ctrl.AjaxNotUpdate();
-
-            getLoadedLanguage();
-            getIfItIsPostback();		
+		
 			base.OnLoad (e);
             processPostback();
 		}
@@ -52,38 +50,16 @@ namespace Framework.Ajax.UI
             htmlPos = tempRender.IndexOf(">", htmlPos);
             int headPos = tempRender.ToLower().IndexOf("<head>");
             if (headPos < 0)
-                tempRender = tempRender.Insert(htmlPos + 1, "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\"><head>" + getScriptHeader() + "</head>");
+                tempRender = tempRender.Insert(htmlPos + 1, "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\"><head>" + GetScriptHeader() + "</head>");
             else
-                tempRender = tempRender.Insert(headPos + 6, getScriptHeader());
-            /*Body*/
-            //int bodyPos = tempRender.ToLower().IndexOf("<body");
-            //if (bodyPos >= 0)
-            //{
-            //    bodyPos = tempRender.ToLower().IndexOf(">", bodyPos);
-            //    int onloadPos = tempRender.ToLower().IndexOf("onload=");
-            //    if (onloadPos < 0)
-            //        tempRender = tempRender.Insert(bodyPos, " onload=\"__start();\"");
-            //    else
-            //        tempRender = tempRender.Insert(onloadPos + 8, "__start();");
-            //}
-            //else
-            //{
-            //    headPos = tempRender.ToLower().IndexOf("</head>");
-            //    tempRender = tempRender.Insert(headPos + 7, "<body onload=\"__start();\">");
-            //    bodyPos = tempRender.ToLower().IndexOf("</body>");
-            //    if (bodyPos < 0)
-            //    {
-            //        htmlPos = tempRender.ToLower().IndexOf("</html>");
-            //        tempRender.Insert(htmlPos, "</body>");
-            //    }
-            //}
+                tempRender = tempRender.Insert(headPos + 6, GetScriptHeader());
             /*Form and postscript*/
             int formPos1 = tempRender.ToLower().IndexOf("<form ");
             int formPos2 = tempRender.IndexOf(">", formPos1);
             if (formPos1 >= 0 && formPos2 >= 0)
             {
                 tempRender = tempRender.Remove(formPos1, formPos2 - formPos1 + 1);
-                tempRender = tempRender.Insert(formPos1, getFormHtmlBegin());
+                tempRender = tempRender.Insert(formPos1, GetFormHtmlBegin());
             }
             else
             {
@@ -91,11 +67,10 @@ namespace Framework.Ajax.UI
                 Response.Write(Framework.Ajax.Properties.Resources.FormTagError);
                 Response.End();
             }
-            formPos1 = tempRender.ToLower().IndexOf(getFormHtmlEnd());
+            formPos1 = tempRender.ToLower().IndexOf(GetFormHtmlEnd());
             if (formPos1 >= 0)
             {
-                tempRender = tempRender.Insert(formPos1 + 7, getPostScript());
-                code = "";
+                tempRender = tempRender.Insert(formPos1 + 7, GetPostScript());
             }
             else
             {
@@ -105,64 +80,37 @@ namespace Framework.Ajax.UI
             }
             writer.Write(tempRender);
         }
-        protected override string getPostScript()
+        protected override string GetPostScript()
         {
-            return "<script type=\"text/javascript\"> $(document).ready(function(){ __start(); " + base.getPostScript() + "}); </script>";
+            return "<script type=\"text/javascript\"> $(document).ready(function(){ __start(); " + base.GetPostScript() + "}); </script>";
         }
         protected override void fillTemplateSpecialTag()
         {
             base.fillTemplateSpecialTag();
             try
             {
-                template["pageTemplate"].Allocate("PRESCRIPT", getScriptHeader());
+                template["pageTemplate"].Allocate("PRESCRIPT", GetScriptHeader());
 
                 //old tags... not is necesary...
                 if (template["pageTemplate"].ContainsValueKey("ONLOAD"))
                     template["pageTemplate"].Allocate("ONLOAD", "__start()");
 
                 if (template["pageTemplate"].ContainsValueKey("INITFORM"))
-                    template["pageTemplate"].Allocate("INITFORM", getFormHtmlBegin());
+                    template["pageTemplate"].Allocate("INITFORM", GetFormHtmlBegin());
 
                 if (template["pageTemplate"].ContainsValueKey("ENDFORM"))
-                    template["pageTemplate"].Allocate("ENDFORM", getFormHtmlEnd());
+                    template["pageTemplate"].Allocate("ENDFORM", GetFormHtmlEnd());
             }
             catch { }
         }
 
-		private string getScriptHeader()
+		private string GetScriptHeader()
 		{
-            string code = "";
-            string url = "AjaxScriptResource.axd";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery-1.3.2.min.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.cookie.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxqueue.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.datepick.pack.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.treeview.pack.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.history.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.common.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.nxApplication.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.ajaxupload.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxTextBox.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.jquery.wysiwyg.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxEditable.js") + "\"></script>" + "\n\t";
-            //code += "<script type=\"text/javascript\" src=\"" + url + "?src=" + EncodeName(Session.SessionID + "res.nxDragnDrop.js") + "\"></script>" + "\n\t";
-            Version v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            code += "<script type=\"text/javascript\" src=\"" + url + "?src=AjaxScripts&v=" + v.ToString() + "\"></script>" + "\n\t";
-            code += "<script type=\"text/javascript\">" + "\n\t";
-            code += "var initialized = false;" + "\n\t";
-			code += "function __start()" + "\n\t";
-			code += "{" + "\n\t";
-            code += "	if(!initialized){ $.nxApplication.Init('loading'); $.historyInit($.nxApplication.pageload);}" + "\n\t";
-			code += "}" + "\n\t";
-			code += "</script>" + "\n";
-			return code;
+            using (AjaxTextWriter writer = new AjaxTextWriter())
+            {
+                ajaxController.WriteScriptHeader(writer);
+                return writer.ToString();
+            }
 		}
-        //private string EncodeName(string name)
-        //{
-        //    byte[] encData_byte = new byte[name.Length];
-        //    encData_byte = System.Text.Encoding.UTF8.GetBytes(name);    
-        //    string encodedData = Convert.ToBase64String(encData_byte);
-        //    return encodedData;
-        //}
 	}
 }

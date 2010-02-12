@@ -21,7 +21,7 @@ namespace Framework.Ajax.UI
         /// <summary>
         /// Has changed and if it is visible
         /// </summary>
-		protected bool hasChanged, isVisible;
+		protected bool hasChanged, isVisible, hasViewState;
         /// <summary>
         /// Display Type
         /// </summary>
@@ -37,8 +37,9 @@ namespace Framework.Ajax.UI
         /// <summary>
         /// internal attribute collection
         /// </summary>
-        protected System.Web.UI.AttributeCollection mAttributes;
+        protected AjaxAttributeCollection mAttributes;
         private string htmlRenderedCache = string.Empty;
+        private IAjaxController ajaxControllerCache = null;
 
         /// <summary>
         /// ID name
@@ -191,18 +192,39 @@ namespace Framework.Ajax.UI
             }
         }
 
+        [Browsable(false)]
+        public bool KeepState
+        {
+            get { return hasViewState; }
+            set { hasViewState = value; }
+        }
+
         /// <summary>
         /// Parent AjaxPage 
         /// </summary>
-        public AjaxPage AjaxPage
+        public virtual IAjaxController AjaxController
 		{
 			get
 			{
-				return (AjaxPage)base.Page;
-			}
-			set
-			{
-				base.Page = value;
+                if (ajaxControllerCache == null)
+                {
+                    if (base.Page is IAjaxControllerContainer)
+                        ajaxControllerCache = (base.Page as IAjaxControllerContainer).AjaxController;
+                    else if (base.Page.Form is IAjaxController)
+                        ajaxControllerCache = (base.Page.Form as IAjaxControllerContainer).AjaxController;
+                    else
+                    {
+                        lock (base.Page.Controls)
+                        {
+                            foreach (Control c in base.Page.Controls)
+                                if (c is IAjaxControllerContainer)
+                                    ajaxControllerCache = (c as IAjaxControllerContainer).AjaxController;
+                        }
+                    }
+                }
+                
+
+                return ajaxControllerCache;
 			}
 		}
 		
@@ -218,6 +240,7 @@ namespace Framework.Ajax.UI
         public AjaxControl(string tagname)
         {
 			base.EnableViewState = true;
+            hasViewState = true;
 			isVisible = true;
             displayType = DisplayType.NotSet;
             mTagName = tagname;
@@ -227,18 +250,6 @@ namespace Framework.Ajax.UI
             mLoadingImgCssClass = string.Empty;
             originalID = string.Empty;
 		}
-
-        //internal static string AttributeToString(int n)
-        //{
-        //    if (n != -1) return n.ToString();
-        //    return null;
-        //}
-
-        //internal static string AttributeToString(string s)
-        //{
-        //    if (s != null && s.Length != 0) return s;
-        //    return null;
-        //}
 
         internal void PreProcessRelativeReference(System.Web.UI.HtmlTextWriter writer, string attribName)
         {
@@ -336,7 +347,7 @@ namespace Framework.Ajax.UI
 
             if (Page != null && hasEvent(eventName))
             {
-                myEvent += AjaxPage.GetPostBackAjaxEvent(this, eventName);
+                myEvent += AjaxController.GetPostBackAjaxEvent(this, eventName);
             }
 
             if (myEvent.Length > 0)
@@ -362,7 +373,7 @@ namespace Framework.Ajax.UI
 
             if (Page != null && hasEvent(eventName))
             {
-                myEvent += AjaxPage.GetPostBackWithValueAjaxEvent(this, eventName, value);
+                myEvent += AjaxController.GetPostBackWithValueAjaxEvent(this, eventName, value);
             }
 
             if (myEvent.Length > 0)
@@ -428,10 +439,10 @@ namespace Framework.Ajax.UI
         /// <param name="writer">javascript writer</param>
         public virtual void RenderJS(AjaxTextWriter writer)
         {
-            if (hasChanged || (!AjaxPage.IsPostBack && !isVisible))
+            if (hasChanged || (!AjaxController.IsPostBack && !isVisible))
                 writer.Write("$('#" + ID + "').visible(" + isVisible.ToString().ToLower() + ");");
 
-            if ((!AjaxPage.IsPostBack || hasChanged) && displayType != DisplayType.NotSet)
+            if ((!AjaxController.IsPostBack || hasChanged) && displayType != DisplayType.NotSet)
             {
                 switch (displayType)
                 {
@@ -447,7 +458,7 @@ namespace Framework.Ajax.UI
                 }
             }
 
-            if (AjaxPage.IsPostBack && hasChanged)
+            if (AjaxController.IsPostBack && hasChanged)
             {
                 writer.Write("$('#" + ID + "').attr('class', \"" + CssClass + "\");");
                 writer.Write("$('#" + ID + "').enabled(" + (!Disabled).ToString().ToLower() + ");");
@@ -472,12 +483,12 @@ namespace Framework.Ajax.UI
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public System.Web.UI.AttributeCollection Attributes
+        public AjaxAttributeCollection Attributes
         {
             get
             {
                 if (mAttributes == null)
-                    mAttributes = new System.Web.UI.AttributeCollection(ViewState);
+                    mAttributes = new AjaxAttributeCollection(ViewState);
                 return mAttributes;
             }
         }
@@ -487,7 +498,7 @@ namespace Framework.Ajax.UI
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public System.Web.UI.CssStyleCollection Style
+        public AjaxCssStyleCollection Style
         {
             get { return Attributes.CssStyle; }
         }
@@ -540,11 +551,65 @@ namespace Framework.Ajax.UI
         /// <param name="obj"></param>
 		public abstract void PutPostValue(string obj);
 
+        protected object GetViewState(object savedState)
+        {
+            switch (AjaxController.ViewStateMode)
+            { 
+                case ViewStateMode.InputHidden:
+                    return savedState;
+                case ViewStateMode.Session:
+                    System.Collections.Hashtable viewState = (Page.Session["__viewState__" + Page.Session.SessionID] as System.Collections.Hashtable);
+                    System.Collections.Hashtable pageViewState = (viewState[Page.GetType().Name] as System.Collections.Hashtable);
+                    return pageViewState[this.ID];
+                case ViewStateMode.Cache:
+                    return null;
+                default:
+                    return null;
+            }
+        }
+        protected object SetViewState(object savedState)
+        {
+            switch (AjaxController.ViewStateMode)
+            {
+                case ViewStateMode.InputHidden:
+                    return savedState;
+                case ViewStateMode.Session:
+                    System.Collections.Hashtable viewState = (Page.Session["__viewState__" + Page.Session.SessionID] as System.Collections.Hashtable);
+                    System.Collections.Hashtable pageViewState = (viewState[Page.GetType().Name] as System.Collections.Hashtable);
+                    if (pageViewState.ContainsKey(this.ID))
+                        pageViewState[this.ID] = savedState;
+                    else
+                        pageViewState.Add(this.ID, savedState);
+                    return null;
+                case ViewStateMode.Cache:
+                    return null;
+                default:
+                    return null;
+            }
+        }
+
         /// <summary>
         /// LoadViewState
         /// </summary>
         /// <param name="savedState">savedState</param>
         protected override void LoadViewState(object savedState)
+        {
+            if (hasViewState)
+                AjaxLoadViewState(GetViewState(savedState));
+        }
+        /// <summary>
+        /// SaveViewState
+        /// </summary>
+        /// <returns>savedState</returns>
+        protected override object SaveViewState()
+        {
+            return (hasViewState) ? SetViewState(AjaxSaveViewState()) : null;
+        }
+        /// <summary>
+        /// nxAjax LoadViewState
+        /// </summary>
+        /// <param name="savedState"></param>
+        protected virtual void AjaxLoadViewState(object savedState)
         {
             object[] state = (object[])(savedState);
             base.LoadViewState(state[0]);
@@ -554,13 +619,14 @@ namespace Framework.Ajax.UI
             mLoadingImg = (string)state[4];
             mLoadingImgID = (string)state[5];
             mLoadingImgCssClass = (string)state[6];
-            mAttributes = (System.Web.UI.AttributeCollection)state[7];
+            mAttributes = (AjaxAttributeCollection)state[7];
+            hasChanged = false;
         }
         /// <summary>
-        /// SaveViewState
+        /// nxAjax SaveViewState
         /// </summary>
-        /// <returns>savedState</returns>
-        protected override object SaveViewState()
+        /// <returns></returns>
+        protected virtual object AjaxSaveViewState()
         {
             object[] state = new object[8];
             state[0] = base.SaveViewState();
@@ -573,11 +639,9 @@ namespace Framework.Ajax.UI
             state[7] = mAttributes;
             return state;
         }
-
 		internal void ProtectedLoadViewState(object savedState)
 		{
             LoadViewState(savedState);
-            hasChanged = false;
 		}
         internal object ProtectedSaveViewState()
 		{

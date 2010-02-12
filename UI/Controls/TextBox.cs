@@ -264,7 +264,7 @@ namespace Framework.Ajax.UI.Controls
 		public override void RenderJS(AjaxTextWriter writer)
 		{
             base.RenderJS(writer);
-			if (!this.AjaxPage.IsPostBack)
+			if (!this.AjaxController.IsPostBack)
 			{
                 renderInitJavaScript(writer);
 			}
@@ -291,17 +291,17 @@ namespace Framework.Ajax.UI.Controls
 			}
 		}
 
-		protected override void LoadViewState(object savedState)
+		protected override void AjaxLoadViewState(object savedState)
 		{
 			object[] state = (object[])(savedState);
-			base.LoadViewState(state[0]);
+			base.AjaxLoadViewState(state[0]);
 			maxLength = (int)state[1];
 			mTextboxType = (TextboxTypes)state[2];
 		}
-		protected override object SaveViewState()
+		protected override object AjaxSaveViewState()
 		{
 			object[] state = new object[3];
-			state[0] = base.SaveViewState();
+			state[0] = base.AjaxSaveViewState();
 			state[1] = maxLength;
             state[2] = mTextboxType;
 			return state;

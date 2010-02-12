@@ -13,6 +13,24 @@ using System.Text;
 namespace Framework.Ajax.UI
 {
     /// <summary>
+    /// ViewState Management Modes
+    /// </summary>
+    public enum ViewStateMode
+    {
+        /// <summary>
+        /// InputHidden
+        /// </summary>
+        InputHidden,
+        /// <summary>
+        /// Session
+        /// </summary>
+        Session,
+        /// <summary>
+        /// Cache
+        /// </summary>
+        Cache
+    }
+    /// <summary>
     /// Post Back Modes
     /// </summary>
     public enum PostBackMode

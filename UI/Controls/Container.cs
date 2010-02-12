@@ -47,7 +47,7 @@ namespace Framework.Ajax.UI.Controls
 		{
             base.RenderJS(writer);
 
-            if (hasChanged || !this.AjaxPage.IsPostBack && containedpage != string.Empty)
+            if (hasChanged || !this.AjaxController.IsPostBack && containedpage != string.Empty)
 			{
 				string param, pag;
 				param = "";
@@ -62,16 +62,16 @@ namespace Framework.Ajax.UI.Controls
 				hasChanged = false;
 			}
 		}
-		protected override void LoadViewState(object savedState)
+		protected override void AjaxLoadViewState(object savedState)
 		{
 			object[] state = (object[])(savedState);
-			base.LoadViewState(state[0]);
+			base.AjaxLoadViewState(state[0]);
 			containedpage = (string)state[1];
 		}
-		protected override object SaveViewState()
+		protected override object AjaxSaveViewState()
 		{
 			object[] state = new object[2];
-			state[0] = base.SaveViewState();
+			state[0] = base.AjaxSaveViewState();
 			state[1] = containedpage;
 			return state;
 		}
