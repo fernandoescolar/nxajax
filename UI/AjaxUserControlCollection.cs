@@ -78,7 +78,8 @@ namespace Framework.Ajax.UI
         /// <returns>The AjaxUserControl Collection</returns>
         public static AjaxUserControlCollection operator +(AjaxUserControlCollection root, AjaxUserControl ctrl)
 		{
-			root.Add(ctrl);
+            if (!(root & ctrl))
+			    root.Add(ctrl);
 			return root;
 		}
         /// <summary>

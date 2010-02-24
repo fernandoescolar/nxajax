@@ -48,12 +48,14 @@ namespace Framework.Ajax.UI.Controls
             ajaxController = new AjaxGenericController();
             return base.CreateControlCollection();
         }
-        protected override void OnLoad(EventArgs e)
+        protected override void OnInit(EventArgs e)
         {
+            base.OnInit(e);
             ajaxController.Page = this.Page;
             ajaxController.Init();
-            
-            
+        }
+        protected override void OnLoad(EventArgs e)
+        {
             //if (IsPostBack && System.Web.HttpContext.Current.Session["__" + this.GetType().Name + "__ViewState" + "__" + System.Web.HttpContext.Current.Session.SessionID] == null)
             //{
             //    System.Web.HttpContext.Current.Response.Clear();
@@ -67,7 +69,7 @@ namespace Framework.Ajax.UI.Controls
                 this.Load(this, e);
                 this.Load = null;
             }
-            ajaxController.Load();
+            ajaxController.Load(this);
             ajaxController.AjaxRequestProcess();
         }
 

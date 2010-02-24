@@ -74,23 +74,19 @@ namespace Framework.Ajax.HttpHandlers
                         {
                             //Loads default nxAjax scripts
                             fileNames = new string[] {  "res.jquery-1.3.2.min.js",
+                                                        "res.jquery-ui-1.7.2.custom.min.js",
                                                         "res.jquery.cookie.js",
                                                         "res.jquery.ajaxqueue.js",
                                                         "res.jquery.datepick.pack.js",
                                                         "res.jquery.treeview.pack.js",
                                                         "res.jquery.history.js",
                                                         "res.jquery.common.js",
-                                                        //"res.nxAjax.js",
                                                         "res.jquery.nxApplication.js",
                                                         "res.jquery.ajaxupload.js",
                                                         "res.nxTextBox.js",
-                                                        //"res.nxAnimation.js",
                                                         "res.jquery.wysiwyg.js",
-                                                        //"res.nxHTMLEditor.js",
-                                                        //"res.nxDatePicker.js",
-                                                        //"res.nxTree.js",
                                                         "res.nxEditable.js",
-                                                        "res.nxDragnDrop.js" 
+                                                        "res.jquery.draganddrop.js"
                                                     };
                             foreach (string fileName in fileNames)
                             {

@@ -136,9 +136,10 @@
     <Compile Include="UI\Controls\Container.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\Controls\DropPanel.cs" />
     <Compile Include="UI\Controls\EditableTextareaLabel.cs" />
     <Compile Include="UI\Controls\DragnDropManager.cs" />
-    <Compile Include="UI\Controls\DragnDropPanel.cs" />
+    <Compile Include="UI\Controls\DragPanel.cs" />
     <Compile Include="UI\Controls\EditableComboLabel.cs" />
     <Compile Include="UI\Controls\DatePicker.cs">
       <SubType>Code</SubType>
@@ -273,7 +274,7 @@
     <EmbeddedResource Include="res\jquery.history.js" />
     <EmbeddedResource Include="res\jquery.wysiwyg.js" />
     <EmbeddedResource Include="Licence.txt" />
-    <EmbeddedResource Include="res\nxDragnDrop.js" />
+    <EmbeddedResource Include="res\jquery.draganddrop.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -287,6 +288,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Components.txt" />
+    <EmbeddedResource Include="res\jquery-ui-1.7.2.custom.min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

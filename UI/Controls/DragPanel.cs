@@ -14,18 +14,18 @@ using System.Web.UI.WebControls;
 namespace Framework.Ajax.UI.Controls
 {
     /// <summary>
-    /// nxAjax framework Drag 'n Drop Panel control
+    /// nxAjax framework Drag Panel control
     /// <code>
-    /// &lt;ajax:DragnDropPanel runat="server"&gt;&lt;/ajax:DragnDropPanel&gt;
+    /// &lt;ajax:DragPanel runat="server"&gt;&lt;/ajax:DragPanel&gt;
     /// </code>
     /// </summary>
     [Designer("Framework.Ajax.UI.Design.AjaxControlDesigner")]
     [ParseChildren(false)]
     [PersistChildren(true)]
-    [Description("A Dragable 'n Dropable Panel control")]
-    [ToolboxData("<{0}:DragnDropPanel runat=\"server\"></{0}:DragnDropPanel>")]
+    [Description("A Dragable Panel control")]
+    [ToolboxData("<{0}:DragPanel runat=\"server\"></{0}:DragPanel>")]
     [ToolboxItem(true)]
-    public class DragnDropPanel : AjaxControl
+    public class DragPanel : AjaxControl
     {
         #region Private Attributes
         private Label divTitle = new Label();
@@ -71,15 +71,43 @@ namespace Framework.Ajax.UI.Controls
         }
 		#endregion
 
-        public DragnDropPanel() : base("div") 
+        public DragPanel() : base("div") 
         { 
-            divTitle.ID = ID + "_Title";
-            divContent.ID = ID + "_Content";
+            
         }
 
 		#region Renders
+        protected bool controlsPrepared = false;
+        protected void prepareControls()
+        {
+            if (controlsPrepared)
+                return;
+
+            divTitle.ID = ID + "_Title";
+            divContent.ID = ID + "_Content";
+
+            divTitle.Page = this.Page;
+            divContent.Page = this.Page;
+
+            if (string.IsNullOrEmpty(divTitle.Attributes["class"]))
+                divTitle.Attributes["class"] = "ajax-dragbox-title";
+            else if (divTitle.Attributes["class"].IndexOf("ajax-dragbox-title") < 0)
+                divTitle.Attributes["class"] += " ajax-dragbox-title";
+
+            if (string.IsNullOrEmpty(divContent.Attributes["class"]))
+                divContent.Attributes["class"] = "ajax-dragbox-content";
+            else if (divTitle.Attributes["class"].IndexOf("ajax-dragbox-content") < 0)
+                divContent.Attributes["class"] += " ajax-dragbox-content";
+        }
 		public override void RenderHTML(AjaxTextWriter writer)
 		{
+            prepareControls();
+
+            if (string.IsNullOrEmpty(Attributes["class"]))
+                Attributes["class"] = "ajax-dragbox";
+            else if (Attributes["class"].IndexOf("ajax-dragbox") < 0)
+                Attributes["class"] += " ajax-dragbox";
+
             RenderBeginTag(writer);
             divTitle.RenderHTML(writer);
             divContent.RenderBeginTag(writer);
@@ -89,6 +117,7 @@ namespace Framework.Ajax.UI.Controls
 		}
         public override void RenderJS(AjaxTextWriter writer)
 		{
+            prepareControls();
             base.RenderJS(writer);
             divTitle.RenderJS(writer);
             divContent.RenderJS(writer);

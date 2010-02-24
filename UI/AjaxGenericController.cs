@@ -112,7 +112,7 @@ namespace Framework.Ajax.UI
         /// <summary>
         /// Loads loaded Language object
         /// </summary>
-        protected virtual void LoadLanguage()
+        internal virtual void LoadLanguage()
         {
 
             if (ilang == null && Page.Session["Language"] != null)
@@ -230,6 +230,21 @@ namespace Framework.Ajax.UI
         {
             foreach (AjaxUserControl ctrl in containedUserControls)
                 ctrl.OnLoad(new EventArgs());
+
+            if (IsPostBack && !Page.IsPostBack)
+                if (ViewStateMode != ViewStateMode.InputHidden)
+                    foreach (AjaxControl ctrl in containedControls)
+                        ctrl.ProtectedLoadViewState(null);
+        }
+        public void Load(Form ajaxForm)
+        {
+            foreach (AjaxUserControl ctrl in containedUserControls)
+                ctrl.OnLoad(new EventArgs());
+
+            if (IsPostBack)
+                if (ViewStateMode != ViewStateMode.InputHidden)
+                    foreach (AjaxControl ctrl in containedControls)
+                        ctrl.ProtectedLoadViewState(null);
         }
         public void CheckPostback()
         {

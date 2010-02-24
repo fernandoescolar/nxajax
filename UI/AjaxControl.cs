@@ -210,8 +210,6 @@ namespace Framework.Ajax.UI
                 {
                     if (base.Page is IAjaxControllerContainer)
                         ajaxControllerCache = (base.Page as IAjaxControllerContainer).AjaxController;
-                    else if (base.Page.Form is IAjaxController)
-                        ajaxControllerCache = (base.Page.Form as IAjaxControllerContainer).AjaxController;
                     else
                     {
                         lock (base.Page.Controls)
